@@ -1,0 +1,40 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.alfayedoficial.astagfirullah</id>
+
+    <!-- Public plugin name should be written in Title Case. -->
+    <name>استغفر الله - Astagfirullah</name>
+
+    <!-- Vendor information -->
+    <vendor email="alialfayed.official@gmail.com" url="https://www.linkedin.com/in/alfayedoficial">Ali Al-Shahat Ali</vendor>
+
+    <!-- Plugin version -->
+    <version>1.0.1</version>
+
+    <!-- Plugin category -->
+    <category>Islamic</category>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag. -->
+    <description><![CDATA[
+        <p>وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُم مَّغْفِرَةً وَأَجْرًا عَظِيمًا</p>
+        <p><em>استتغفر الله العظيم من كل الذنوب</em></p>
+        <p>الحمد لله لما هدانا لهذا وما كنا لنهتدي لولا أن هدانا الله</p>
+        <p>تطبيق لاستغلال وقت الانتظار في الذكر والاستغفار والتسبيح <br> والصلاة على النبي صلى الله عليه وسلم</p>
+        <p><strong>اذكرونى بصالح الأعمال</strong></p>
+        <p><b>Developer:</b> Ali Al-Shahat Ali</p>
+        <p><b>Contact me:</b> <a href="https://www.linkedin.com/in/alfayedoficial/">Linkedin Account</a></p>
+    ]]></description>
+
+    <!-- Product and plugin compatibility requirements. -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin. -->
+    <extensions defaultExtensionNs="com.intellij">
+
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.StartupActivity" />
+
+    </extensions>
+
+
+</idea-plugin>
