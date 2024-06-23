@@ -4,8 +4,9 @@ plugins {
    id("org.jetbrains.intellij") version "1.17.3" // Make sure this version is compatible
 }
 
+
 group = "com.alfayedoficial"
-version = "1.0.3"
+version = "1.0.13"
 
 repositories {
    mavenCentral()
@@ -24,17 +25,27 @@ intellij {
 }
 
 tasks {
+   // Use Java 17 for versions up to 241
    withType<JavaCompile> {
-      sourceCompatibility = "17"
-      targetCompatibility = "17"
+      if (intellij.version.get().startsWith("242")) {
+         sourceCompatibility = "21"
+         targetCompatibility = "21"
+      } else {
+         sourceCompatibility = "17"
+         targetCompatibility = "17"
+      }
    }
    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      kotlinOptions.jvmTarget = "17"
+      if (intellij.version.get().startsWith("242")) {
+         kotlinOptions.jvmTarget = "21"
+      } else {
+         kotlinOptions.jvmTarget = "17"
+      }
    }
 
    patchPluginXml {
       sinceBuild.set("231")
-      untilBuild.set("241.*")
+      untilBuild.set("242.*")
    }
 
    signPlugin {
@@ -50,5 +61,15 @@ tasks {
    // Add task to build the plugin distribution
    buildPlugin {
       dependsOn("patchPluginXml")
+   }
+}
+
+kotlin {
+   jvmToolchain {
+      if (intellij.version.get().startsWith("242")) {
+         languageVersion.set(JavaLanguageVersion.of(21))
+      } else {
+         languageVersion.set(JavaLanguageVersion.of(17))
+      }
    }
 }

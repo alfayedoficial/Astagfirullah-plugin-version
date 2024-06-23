@@ -1,18 +1,16 @@
 package com.alfayedoficial.astagfirullah
 
 import com.intellij.build.BuildProgressListener
-import com.intellij.build.BuildViewManager
 import com.intellij.build.events.BuildEvent
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.panel.ProgressPanel
-import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.wm.WindowManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 
 @Service(Service.Level.PROJECT)
