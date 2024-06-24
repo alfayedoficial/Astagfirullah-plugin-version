@@ -11,6 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.io.BufferedInputStream
+import java.io.FileNotFoundException
+import java.io.InputStream
+import javax.sound.sampled.AudioSystem
 
 
 @Service(Service.Level.PROJECT)
@@ -39,6 +43,23 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
       return  ProgressManager.getInstance().hasProgressIndicator()
    }
 
+   private fun playSound() {
+      try {
+         val inputStream: InputStream? = this::class.java.getResourceAsStream("/raw/mohmmed.wav")
+         if (inputStream != null) {
+            val bufferedInputStream = BufferedInputStream(inputStream)
+            val audioInputStream = AudioSystem.getAudioInputStream(bufferedInputStream)
+            val clip = AudioSystem.getClip()
+            clip.open(audioInputStream)
+            clip.start()
+         } else {
+            throw FileNotFoundException("Resource not found: /raw/mohmmed.wav")
+         }
+      } catch (e: Exception) {
+         e.printStackTrace()
+      }
+   }
+
    @Synchronized
    override fun onEvent(buildId: Any, event: BuildEvent) {
       if (!isTaskRunning && !isAnyTaskRunning()) {
@@ -48,10 +69,11 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
                try {
                   runBlocking {
                      withContext(Dispatchers.Default) {
+                        playSound() // Play sound at the start
                         for (i in arabicPhrases.indices) {
                            indicator.text = arabicPhrases[i]
                            indicator.fraction = (i + 1) / arabicPhrases.size.toDouble()
-                           delay(1000) // Adjust the delay as needed
+                           delay(1200) // Adjust the delay as needed
                         }
                      }
                   }

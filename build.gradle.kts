@@ -6,10 +6,11 @@ plugins {
 
 
 group = "com.alfayedoficial"
-version = "1.0.13"
+version = "1.0.14"
 
 repositories {
    mavenCentral()
+   maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {

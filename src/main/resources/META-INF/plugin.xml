@@ -9,7 +9,7 @@
     <vendor email="alialfayed.official@gmail.com" url="https://www.linkedin.com/in/alfayedoficial">Ali Al-Shahat Ali</vendor>
 
     <!-- Plugin version -->
-    <version>1.0.13</version>
+    <version>1.0.14</version>
 
     <!-- Plugin category -->
     <category>Islamic</category>
@@ -43,6 +43,15 @@
             <li>الإصدار الأول من إضافة استغفر الله.</li>
             <li>ميزات الذكر والاستغفار والتسبيح والصلاة على النبي محمد (صلى الله عليه وسلم).</li>
             <li>استغلال وقت الانتظار في الممارسات المفيدة.</li>
+        </ul>
+         <p>Version 1.0.14:</p>
+        <ul>
+            <li>New feature: Play sound "صلى على سيدنا محمد" during progress tasks.</li>
+        </ul>
+        <hr>
+        <p>الإصدار 1.0.14:</p>
+        <ul>
+            <li>ميزة جديدة: تشغيل صوت "صلى على سيدنا محمد" أثناء المهام التقدمية.</li>
         </ul>
     ]]></change-notes>
 
