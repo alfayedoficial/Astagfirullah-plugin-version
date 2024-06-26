@@ -139,22 +139,22 @@ object TranslatePhrases{
     )
 
     fun selectedTranslatePhrases(): List<String> {
-        val savedLanguage = PropertiesManager.getValue("preferredLanguage", "العربية")
+        val savedLanguage = PropertiesManager.getPreferredLanguage()
 
         val phrases = when(savedLanguage){
-            "العربية" -> TranslatePhrases.arabicPhrases
-            "English" -> TranslatePhrases.englishPhrases
-            "أوردو" -> TranslatePhrases.urduPhrases
-            "فارسى" -> TranslatePhrases.farsiPhrases
-            else -> TranslatePhrases.arabicPhrases
+            "العربية" -> arabicPhrases
+            "English" -> englishPhrases
+            "أوردو" -> urduPhrases
+            "فارسى" -> farsiPhrases
+            else -> arabicPhrases
         }
 
         // take random 10 phrases from the list
-        return phrases.shuffled().take(10)
+        return phrases.shuffled().take(6)
     }
 
     fun selectTranslateTitle(): String {
-        val savedLanguage = PropertiesManager.getValue("preferredLanguage", "العربية")
+        val savedLanguage = PropertiesManager.getPreferredLanguage()
         return when(savedLanguage){
             "العربية" -> "اذكر الله"
             "English" -> "Remember Allah"

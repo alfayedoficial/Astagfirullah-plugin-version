@@ -10,7 +10,7 @@
     </vendor>
 
     <!-- Plugin version -->
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 
     <!-- Plugin category -->
     <category>Islamic</category>
@@ -33,29 +33,34 @@
         <hr>
         <p><b>Features:</b></p>
         <ul>
-            <li>Initial release of the Astagfirullah plugin.</li>
             <li>Features remembrance, seeking forgiveness, glorification, and sending blessings upon the Prophet Muhammad (peace be upon him).</li>
             <li>Utilizes waiting time for beneficial practices.</li>
             <li>Play sound "صلى على سيدنا محمد" during progress tasks.</li>
+            <li>Support multi-language: "العربية", "English", "أوردو", "فارسى"</li>
+
         </ul>
         <hr>
         <ul>
-            <li>الإصدار الأول من إضافة استغفر الله.</li>
             <li>ميزات الذكر والاستغفار والتسبيح والصلاة على النبي محمد (صلى الله عليه وسلم).</li>
             <li>استغلال وقت الانتظار في الممارسات المفيدة.</li>
             <li>تشغيل صوت "صلى على سيدنا محمد" أثناء المهام التقدمية</li>
+            <li>دعم لغات متعدد : "العربية", "الإنحليزية", "أوردو", "فارسى"</li>
         </ul>
 
     ]]></description>
     <change-notes><![CDATA[
-        <p>Version 1.1.0:</p>
+        <p>Version 1.1.١:</p>
         <ul>
-            <li>Added multi-language support: "العربية", "English", "أوردو", "فارسى"</li>
+            <li>Increase long time for reading</li>
+            <li>Less display random count of phrases</li>
+            <li>Add option to enable or disable sound </li>
         </ul>
         <hr>
-        <p>الإصدار 1.1.0:</p>
+        <p>الإصدار 1.1.1:</p>
         <ul>
-            <li>إضافة دعم متعدد اللغات: "العربية", "English", "أوردو", "فارسى"</li>
+            <li>زيادة وقت طويل للقراءة</li>
+            <li>عرض أقل عدد عشوائي من العبارات</li>
+            <li>إضافة خيار لتمكين أو تعطيل الصوت</li>
         </ul>
     ]]></change-notes>
 

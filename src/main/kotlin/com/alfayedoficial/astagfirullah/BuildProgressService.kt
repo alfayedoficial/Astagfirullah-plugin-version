@@ -66,12 +66,15 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
                try {
                   runBlocking {
                      withContext(Dispatchers.Default) {
+
                         val phrases = selectedTranslatePhrases()
-                        playSound() // Play sound at the start
+
+                        if (PropertiesManager.isSoundEnabled()) playSound() // Play sound at the start
+
                         for (i in phrases.indices) {
                            indicator.text = phrases[i]
                            indicator.fraction = (i + 1) / phrases.size.toDouble()
-                           delay(1200) // Adjust the delay as needed
+                           delay(1500) // Adjust the delay as needed
                         }
                      }
                   }

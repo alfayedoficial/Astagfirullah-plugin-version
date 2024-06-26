@@ -5,11 +5,19 @@ import com.intellij.ide.util.PropertiesComponent
 object PropertiesManager {
     private val propertiesComponent: PropertiesComponent = PropertiesComponent.getInstance()
 
-    fun getValue(key: String, defaultValue: String): String {
-        return propertiesComponent.getValue(key, defaultValue)
+    fun getPreferredLanguage(): String {
+        return propertiesComponent.getValue("preferredLanguage", "العربية")
     }
 
-    fun setValue(key: String, value: String) {
-        propertiesComponent.setValue(key, value)
+    fun setPreferredLanguage(language: String) {
+        propertiesComponent.setValue("preferredLanguage", language)
+    }
+
+    fun isSoundEnabled(): Boolean {
+        return propertiesComponent.getValue("preferredSound", "true") == "true"
+    }
+
+    fun setSoundEnabled(enabled: String) {
+        propertiesComponent.setValue("preferredSound", enabled)
     }
 }

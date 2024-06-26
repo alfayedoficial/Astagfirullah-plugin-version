@@ -7,7 +7,6 @@ import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.panel
-import kotlinx.coroutines.DelicateCoroutinesApi
 import java.awt.Desktop
 import java.net.URI
 import javax.swing.*
@@ -22,17 +21,16 @@ class AstagfirullahAppAction : AnAction() {
 class AppSettingsDialog : DialogWrapper(true) {
     private val languages = arrayOf("العربية", "English", "أوردو", "فارسى")
     private val languageComboBox = ComboBox(DefaultComboBoxModel(languages))
+    private val enableSoundCheckBox = JCheckBox("Blessings upon the Prophet Muhammad sound", PropertiesManager.isSoundEnabled())
 
     init {
         title = "Settings"
         init()
 
         // Load saved language preference
-        languageComboBox.selectedItem =  PropertiesManager.getValue("preferredLanguage", "العربية")
+        languageComboBox.selectedItem = PropertiesManager.getPreferredLanguage()
     }
 
-
-    @OptIn(DelicateCoroutinesApi::class)
     override fun createCenterPanel(): JComponent {
         val tabbedPane = JBTabbedPane()
 
@@ -40,6 +38,9 @@ class AppSettingsDialog : DialogWrapper(true) {
         val settingsPanel = panel {
             row("Language:") {
                 cell(languageComboBox).align(Align.FILL)
+            }
+            row {
+                cell(enableSoundCheckBox)
             }
         }
         tabbedPane.addTab("Settings", settingsPanel)
@@ -76,16 +77,16 @@ class AppSettingsDialog : DialogWrapper(true) {
 
         return tabbedPane
     }
+
     override fun doOKAction() {
         super.doOKAction()
         // Save selected language to shared preferences
         val selectedLanguage = languageComboBox.selectedItem as String
-        PropertiesManager.setValue("preferredLanguage", selectedLanguage)
+        PropertiesManager.setPreferredLanguage(selectedLanguage)
+        PropertiesManager.setSoundEnabled(enableSoundCheckBox.isSelected.toString())
     }
 
-
 }
-
 
 
 
