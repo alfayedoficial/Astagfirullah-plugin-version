@@ -6,10 +6,11 @@
     <name>Astagfirullah</name>
 
     <!-- Vendor information -->
-    <vendor email="alialfayed.official@gmail.com" url="https://www.linkedin.com/in/alfayedoficial">Ali Al-Shahat Ali</vendor>
+    <vendor email="alialfayed.official@gmail.com" url="https://www.linkedin.com/in/alfayedoficial">Ali Al-Shahat Ali
+    </vendor>
 
     <!-- Plugin version -->
-    <version>1.0.14</version>
+    <version>1.1.0</version>
 
     <!-- Plugin category -->
     <category>Islamic</category>
@@ -29,31 +30,35 @@
         <p>تطبيق لاستغلال وقت الانتظار في الذكر والاستغفار والتسبيح <br> والصلاة على النبي صلى الله عليه وسلم</p>
         <p><strong>اذكرونى بصالح الأعمال</strong></p>
 
-    ]]></description>
-    <change-notes><![CDATA[
-        <p>Version 1.0.13:</p>
+        <hr>
+        <p><b>Features:</b></p>
         <ul>
             <li>Initial release of the Astagfirullah plugin.</li>
             <li>Features remembrance, seeking forgiveness, glorification, and sending blessings upon the Prophet Muhammad (peace be upon him).</li>
             <li>Utilizes waiting time for beneficial practices.</li>
+            <li>Play sound "صلى على سيدنا محمد" during progress tasks.</li>
         </ul>
         <hr>
-        <p>الإصدار 1.0.13:</p>
         <ul>
             <li>الإصدار الأول من إضافة استغفر الله.</li>
             <li>ميزات الذكر والاستغفار والتسبيح والصلاة على النبي محمد (صلى الله عليه وسلم).</li>
             <li>استغلال وقت الانتظار في الممارسات المفيدة.</li>
+            <li>تشغيل صوت "صلى على سيدنا محمد" أثناء المهام التقدمية</li>
         </ul>
-         <p>Version 1.0.14:</p>
+
+    ]]></description>
+    <change-notes><![CDATA[
+        <p>Version 1.1.0:</p>
         <ul>
-            <li>New feature: Play sound "صلى على سيدنا محمد" during progress tasks.</li>
+            <li>Added multi-language support: "العربية", "English", "أوردو", "فارسى"</li>
         </ul>
         <hr>
-        <p>الإصدار 1.0.14:</p>
+        <p>الإصدار 1.1.0:</p>
         <ul>
-            <li>ميزة جديدة: تشغيل صوت "صلى على سيدنا محمد" أثناء المهام التقدمية.</li>
+            <li>إضافة دعم متعدد اللغات: "العربية", "English", "أوردو", "فارسى"</li>
         </ul>
     ]]></change-notes>
+
 
     <!-- Product and plugin compatibility requirements. -->
     <depends>com.intellij.modules.platform</depends>
@@ -61,9 +66,21 @@
     <!-- Extension points defined by the plugin. -->
     <extensions defaultExtensionNs="com.intellij">
 
-        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.StartupActivity" />
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.StartupActivity"/>
 
     </extensions>
+    <!-- Add new action to Tools menu -->
+
+    <actions>
+        <action id="com.alfayedoficial.astagfirullah.AstagfirullahAppAction"
+                class="com.alfayedoficial.astagfirullah.AstagfirullahAppAction"
+                text="Astagfirullah"
+                description="Settings for Astagfirullah"
+                icon="icons/pluginIconSmall.svg">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+
 
     <idea-version since-build="231" until-build="242.*"/>
 

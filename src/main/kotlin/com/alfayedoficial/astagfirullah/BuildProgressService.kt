@@ -1,5 +1,7 @@
 package com.alfayedoficial.astagfirullah
 
+import com.alfayedoficial.astagfirullah.TranslatePhrases.selectTranslateTitle
+import com.alfayedoficial.astagfirullah.TranslatePhrases.selectedTranslatePhrases
 import com.intellij.build.BuildProgressListener
 import com.intellij.build.events.BuildEvent
 import com.intellij.openapi.components.Service
@@ -21,26 +23,12 @@ import javax.sound.sampled.AudioSystem
 class BuildProgressService(val project: Project) : BuildProgressListener {
 
    companion object {
-      val arabicPhrases = listOf(
-         "اللهم صل وسلم على نبينا محمد",
-         "سبحان الله",
-         "الحمدلله",
-         "لا إله إلا الله",
-         "الله أكبر",
-         "أستغفر الله",
-         "سبحان الله وبحمده",
-         "سبحان الله العظيم",
-         "لا حول ولا قوة إلا بالله",
-         "اللهم صل وسلم على نبينا محمد",
-         "لا إله إلا أنت سبحانك إني كنت من الظالمين"
-      )
-
       @Volatile
       private var isTaskRunning = false
    }
 
    private fun isAnyTaskRunning(): Boolean {
-      return  ProgressManager.getInstance().hasProgressIndicator()
+      return ProgressManager.getInstance().hasProgressIndicator()
    }
 
    private fun playSound() {
@@ -62,17 +50,27 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
 
    @Synchronized
    override fun onEvent(buildId: Any, event: BuildEvent) {
+      handleTask()
+   }
+
+   fun onSyncEvent() {
+      handleTask()
+   }
+
+
+   private fun handleTask() {
       if (!isTaskRunning && !isAnyTaskRunning()) {
          isTaskRunning = true
-         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "اذكر الله", false) {
+         ProgressManager.getInstance().run(object : Task.Backgroundable(project, selectTranslateTitle(), false) {
             override fun run(indicator: ProgressIndicator) {
                try {
                   runBlocking {
                      withContext(Dispatchers.Default) {
+                        val phrases = selectedTranslatePhrases()
                         playSound() // Play sound at the start
-                        for (i in arabicPhrases.indices) {
-                           indicator.text = arabicPhrases[i]
-                           indicator.fraction = (i + 1) / arabicPhrases.size.toDouble()
+                        for (i in phrases.indices) {
+                           indicator.text = phrases[i]
+                           indicator.fraction = (i + 1) / phrases.size.toDouble()
                            delay(1200) // Adjust the delay as needed
                         }
                      }
@@ -84,5 +82,4 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
          })
       }
    }
-
 }
