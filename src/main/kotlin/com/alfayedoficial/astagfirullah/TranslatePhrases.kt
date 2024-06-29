@@ -144,7 +144,7 @@ object TranslatePhrases{
         val phrases = when(savedLanguage){
             "العربية" -> arabicPhrases
             "English" -> englishPhrases
-            "أوردو" -> urduPhrases
+            "أردو" -> urduPhrases
             "فارسى" -> farsiPhrases
             else -> arabicPhrases
         }
@@ -158,7 +158,7 @@ object TranslatePhrases{
         return when(savedLanguage){
             "العربية" -> "اذكر الله"
             "English" -> "Remember Allah"
-            "أوردو" -> "اللہ کی یاد"
+            "أردو" -> "اللہ کی یاد"
             "فارسى" -> "یاد خدا"
             else -> "اذكر الله"
         }

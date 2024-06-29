@@ -19,8 +19,10 @@ class AstagfirullahAppAction : AnAction() {
 }
 
 class AppSettingsDialog : DialogWrapper(true) {
-    private val languages = arrayOf("العربية", "English", "أوردو", "فارسى")
+    private val languages = arrayOf("العربية", "English", "أردو", "فارسى")
+    private val seconds = arrayOf("1","1.5",  "2", "2.4","3","3.5","4", "4.5" , "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10")
     private val languageComboBox = ComboBox(DefaultComboBoxModel(languages))
+    private val secondsComboBox = ComboBox(DefaultComboBoxModel(seconds))
     private val enableSoundCheckBox = JCheckBox("Blessings upon the Prophet Muhammad sound", PropertiesManager.isSoundEnabled())
 
     init {
@@ -29,6 +31,7 @@ class AppSettingsDialog : DialogWrapper(true) {
 
         // Load saved language preference
         languageComboBox.selectedItem = PropertiesManager.getPreferredLanguage()
+        secondsComboBox.selectedItem = PropertiesManager.getPreferredDelaySeconds()
     }
 
     override fun createCenterPanel(): JComponent {
@@ -38,6 +41,9 @@ class AppSettingsDialog : DialogWrapper(true) {
         val settingsPanel = panel {
             row("Language:") {
                 cell(languageComboBox).align(Align.FILL)
+            }
+            row("Delay second for every phrase:") {
+                cell(secondsComboBox).align(Align.FILL)
             }
             row {
                 cell(enableSoundCheckBox)
@@ -84,6 +90,7 @@ class AppSettingsDialog : DialogWrapper(true) {
         val selectedLanguage = languageComboBox.selectedItem as String
         PropertiesManager.setPreferredLanguage(selectedLanguage)
         PropertiesManager.setSoundEnabled(enableSoundCheckBox.isSelected.toString())
+        PropertiesManager.setPreferredDelaySeconds(secondsComboBox.selectedItem as String)
     }
 
 }

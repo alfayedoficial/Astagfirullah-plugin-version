@@ -10,7 +10,7 @@ import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.messages.MessageBusConnection
 
-class StartupActivity : ProjectActivity {
+class AppProjectActivity : ProjectActivity {
 
    override suspend fun execute(project: Project) {
       val buildViewManager = project.service<BuildViewManager>()
@@ -27,5 +27,6 @@ class StartupActivity : ProjectActivity {
          }
       })
    }
+
 }
 

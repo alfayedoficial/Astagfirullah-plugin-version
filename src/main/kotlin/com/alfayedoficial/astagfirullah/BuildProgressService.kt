@@ -57,7 +57,6 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
       handleTask()
    }
 
-
    private fun handleTask() {
       if (!isTaskRunning && !isAnyTaskRunning()) {
          isTaskRunning = true
@@ -68,13 +67,14 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
                      withContext(Dispatchers.Default) {
 
                         val phrases = selectedTranslatePhrases()
+                        val delay = convertSECONDSToMillis(PropertiesManager.getPreferredDelaySeconds())
 
                         if (PropertiesManager.isSoundEnabled()) playSound() // Play sound at the start
 
                         for (i in phrases.indices) {
                            indicator.text = phrases[i]
                            indicator.fraction = (i + 1) / phrases.size.toDouble()
-                           delay(1500) // Adjust the delay as needed
+                           delay(delay) // Adjust the delay as needed
                         }
                      }
                   }
@@ -83,6 +83,34 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
                }
             }
          })
+
+      }
+   }
+
+   private fun convertSECONDSToMillis(preferredDelaySECONDS: String): Long {
+      return when (preferredDelaySECONDS) {
+         "1" -> 1000
+         "1.5" -> 1500
+         "2" -> 2000
+         "2.5" -> 2500
+         "3" -> 3000
+         "3.5" -> 3500
+         "4" -> 4000
+         "4.5" -> 4500
+         "5" -> 5000
+         "5.5" -> 5500
+         "6" -> 6000
+         "6.5" -> 6500
+         "7" -> 7000
+         "7.5" -> 7500
+         "8" -> 8000
+         "8.5" -> 8500
+         "9" -> 9000
+         "9.5" -> 9500
+         "10" -> 10000
+         else -> {
+            1000
+         }
       }
    }
 }

@@ -10,7 +10,7 @@
     </vendor>
 
     <!-- Plugin version -->
-    <version>1.1.1</version>
+    <version>1.1.3</version>
 
     <!-- Plugin category -->
     <category>Islamic</category>
@@ -37,7 +37,10 @@
             <li>Utilizes waiting time for beneficial practices.</li>
             <li>Play sound "صلى على سيدنا محمد" during progress tasks.</li>
             <li>Support multi-language: "العربية", "English", "أوردو", "فارسى"</li>
-
+            <li>1.5 Sec for reading</li>
+            <li>Display 5 random count of phrases</li>
+            <li>Option to enable or disable sound </li>
+            <li>Reminder for rating plugin</li>
         </ul>
         <hr>
         <ul>
@@ -45,22 +48,23 @@
             <li>استغلال وقت الانتظار في الممارسات المفيدة.</li>
             <li>تشغيل صوت "صلى على سيدنا محمد" أثناء المهام التقدمية</li>
             <li>دعم لغات متعدد : "العربية", "الإنحليزية", "أوردو", "فارسى"</li>
+            <li>١٫٥ ثانية للقراءة</li>
+            <li>عرض ٥ عبارات عشوائي</li>
+            <li>خيار لتمكين أو تعطيل الصوت</li>
+            <li>تذكير بتقييم البرنامج</li>
+
         </ul>
 
     ]]></description>
     <change-notes><![CDATA[
-        <p>Version 1.1.١:</p>
+        <p>Version 1.1.3:</p>
         <ul>
-            <li>Increase long time for reading</li>
-            <li>Less display random count of phrases</li>
-            <li>Add option to enable or disable sound </li>
+             <li>Add the option of delaying the second of every phrase</li>
         </ul>
         <hr>
-        <p>الإصدار 1.1.1:</p>
+        <p>الإصدار 1.1.3:</p>
         <ul>
-            <li>زيادة وقت طويل للقراءة</li>
-            <li>عرض أقل عدد عشوائي من العبارات</li>
-            <li>إضافة خيار لتمكين أو تعطيل الصوت</li>
+            <li>إضافة خيار تأخير الثانية من كل استغفار</li>
         </ul>
     ]]></change-notes>
 
@@ -71,7 +75,8 @@
     <!-- Extension points defined by the plugin. -->
     <extensions defaultExtensionNs="com.intellij">
 
-        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.StartupActivity"/>
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.AppProjectActivity"/>
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.RatePromptActivity"/>
 
     </extensions>
     <!-- Add new action to Tools menu -->
