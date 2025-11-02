@@ -57,7 +57,17 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
       handleTask()
    }
 
-   private fun handleTask() {
+   /**
+    * Display random phrases when the IDE opens.
+    * This method is called when the IDE starts.
+    * Displays phrases for 5 seconds.
+    */
+   fun displayPhrasesOnStartup() {
+      // Use a fixed 5-second duration for startup display
+      handleTask(5)
+   }
+
+   private fun handleTask(maxDurationSeconds: Int = -1) {
       if (!isTaskRunning && !isAnyTaskRunning()) {
          isTaskRunning = true
          ProgressManager.getInstance().run(object : Task.Backgroundable(project, selectTranslateTitle(), false) {
@@ -67,7 +77,14 @@ class BuildProgressService(val project: Project) : BuildProgressListener {
                      withContext(Dispatchers.Default) {
 
                         val phrases = selectedTranslatePhrases()
-                        val delay = convertSECONDSToMillis(PropertiesManager.getPreferredDelaySeconds())
+                        val delay = if (maxDurationSeconds > 0) {
+                           // Calculate delay based on max duration and number of phrases
+                           val totalMillis = maxDurationSeconds * 1000
+                           val delayPerPhrase = totalMillis / phrases.size
+                           delayPerPhrase.toLong()
+                        } else {
+                           convertSECONDSToMillis(PropertiesManager.getPreferredDelaySeconds())
+                        }
 
                         if (PropertiesManager.isSoundEnabled()) playSound() // Play sound at the start
 

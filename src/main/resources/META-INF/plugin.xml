@@ -18,18 +18,10 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag. -->
     <description><![CDATA[
-         <p>This plugin helps utilize waiting time for remembrance, seeking forgiveness, glorification, and sending blessings upon the Prophet Muhammad (peace be upon him).</p>
+        <p>This plugin helps utilize waiting time for remembrance, seeking forgiveness, glorification, and sending blessings upon the Prophet Muhammad (peace be upon him).</p>
         <p><strong>Mention me in your good deeds</strong></p>
         <p><b>Developer:</b> Ali Al-Shahat Ali</p>
         <p><b>Contact me:</b> <a href="https://www.linkedin.com/in/alfayedoficial/">Linkedin Account</a></p>
-        <hr>
-
-        <p>وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُم مَّغْفِرَةً وَأَجْرًا عَظِيمًا</p>
-        <p><em>استتغفر الله العظيم من كل الذنوب</em></p>
-        <p>الحمد لله لما هدانا لهذا وما كنا لنهتدي لولا أن هدانا الله</p>
-        <p>تطبيق لاستغلال وقت الانتظار في الذكر والاستغفار والتسبيح <br> والصلاة على النبي صلى الله عليه وسلم</p>
-        <p><strong>اذكرونى بصالح الأعمال</strong></p>
-
         <hr>
         <p><b>Features:</b></p>
         <ul>
@@ -42,29 +34,11 @@
             <li>Option to enable or disable sound </li>
             <li>Reminder for rating plugin</li>
         </ul>
-        <hr>
-        <ul>
-            <li>ميزات الذكر والاستغفار والتسبيح والصلاة على النبي محمد (صلى الله عليه وسلم).</li>
-            <li>استغلال وقت الانتظار في الممارسات المفيدة.</li>
-            <li>تشغيل صوت "صلى على سيدنا محمد" أثناء المهام التقدمية</li>
-            <li>دعم لغات متعدد : "العربية", "الإنحليزية", "أوردو", "فارسى"</li>
-            <li>١٫٥ ثانية للقراءة</li>
-            <li>عرض ٥ عبارات عشوائي</li>
-            <li>خيار لتمكين أو تعطيل الصوت</li>
-            <li>تذكير بتقييم البرنامج</li>
-
-        </ul>
-
     ]]></description>
     <change-notes><![CDATA[
         <p>Version 1.1.4:</p>
         <ul>
              <li>Support IDEs until 252</li>
-        </ul>
-        <hr>
-        <p>الإصدار 1.1.4:</p>
-        <ul>
-            <li>يدعم حتى النسخة 252</li>
         </ul>
     ]]></change-notes>
 
@@ -77,6 +51,10 @@
 
         <postStartupActivity implementation="com.alfayedoficial.astagfirullah.AppProjectActivity"/>
         <postStartupActivity implementation="com.alfayedoficial.astagfirullah.RatePromptActivity"/>
+        <!-- Register AppProjectActivity again to trigger BuildProgressService when IDE opens -->
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.AppProjectActivity"/>
+        <!-- Register SimplePhraseDialogActivity to show dialog when IDE opens -->
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.SimplePhraseDialogActivity"/>
 
     </extensions>
     <!-- Add new action to Tools menu -->
@@ -86,12 +64,12 @@
                 class="com.alfayedoficial.astagfirullah.AstagfirullahAppAction"
                 text="Astagfirullah"
                 description="Settings for Astagfirullah"
-                icon="icons/pluginIconSmall.svg">
+                icon="/icons/pluginIconSmall.svg">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>
 
 
-    <idea-version since-build="231" until-build="242.*"/>
+    <idea-version since-build="231" until-build="252.*"/>
 
 </idea-plugin>

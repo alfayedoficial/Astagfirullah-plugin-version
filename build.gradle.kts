@@ -15,8 +15,11 @@ repositories {
 
 dependencies {
    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
+   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
+   implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.1")
+   implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.20")
 }
 
 intellij {
@@ -26,22 +29,13 @@ intellij {
 }
 
 tasks {
-   // Use Java 17 for versions up to 241
+   // Use Java 17 for all versions to ensure compatibility
    withType<JavaCompile> {
-      if (intellij.version.get().startsWith("242")) {
-         sourceCompatibility = "21"
-         targetCompatibility = "21"
-      } else {
-         sourceCompatibility = "17"
-         targetCompatibility = "17"
-      }
+      sourceCompatibility = "17"
+      targetCompatibility = "17"
    }
    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      if (intellij.version.get().startsWith("242")) {
-         kotlinOptions.jvmTarget = "21"
-      } else {
-         kotlinOptions.jvmTarget = "17"
-      }
+      kotlinOptions.jvmTarget = "17"
    }
 
    patchPluginXml {
@@ -67,10 +61,6 @@ tasks {
 
 kotlin {
    jvmToolchain {
-      if (intellij.version.get().startsWith("242")) {
-         languageVersion.set(JavaLanguageVersion.of(21))
-      } else {
-         languageVersion.set(JavaLanguageVersion.of(17))
-      }
+      languageVersion.set(JavaLanguageVersion.of(17))
    }
 }

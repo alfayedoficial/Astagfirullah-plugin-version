@@ -19,6 +19,9 @@ class AppProjectActivity : ProjectActivity {
 
       buildViewManager.addListener(buildProgressService, disposable)
 
+      // Display phrases on startup
+      buildProgressService.displayPhrasesOnStartup()
+
       // Add listener for project synchronization
       val connection: MessageBusConnection = project.messageBus.connect(disposable)
       connection.subscribe(ProjectTopics.PROJECT_ROOTS, object : ModuleRootListener {
@@ -29,4 +32,3 @@ class AppProjectActivity : ProjectActivity {
    }
 
 }
-

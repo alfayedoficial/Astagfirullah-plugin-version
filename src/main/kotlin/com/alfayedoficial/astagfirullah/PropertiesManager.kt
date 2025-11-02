@@ -22,7 +22,7 @@ object PropertiesManager {
     }
 
     fun isSoundEnabled(): Boolean {
-        return propertiesComponent.getValue(PREFERRED_SOUND_KEY, "true") == "true"
+        return propertiesComponent.getValue(PREFERRED_SOUND_KEY, "false") == "false"
     }
 
     fun setSoundEnabled(enabled: String) {
