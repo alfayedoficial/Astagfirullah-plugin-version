@@ -1,0 +1,52 @@
+package com.alfayedoficial.astagfirullah.core
+
+/**
+ * Central location for all plugin constants.
+ * Eliminates magic strings and numbers throughout the codebase.
+ */
+object Constants {
+
+    // Plugin Information
+    const val PLUGIN_ID = "com.alfayedoficial.astagfirullah"
+    const val PLUGIN_VERSION = "2.0.0"
+    const val PLUGIN_NAME = "Astagfirullah"
+
+    // API Configuration
+    const val API_BASE_URL = "https://astaghfirullah.4fdev.com/api/v2"
+    const val API_PRAISE_LIST_ENDPOINT = "/praise/list"
+    const val API_TIMEOUT_SECONDS = 30L
+    const val API_CATEGORY_FILTER = 1  // Filter by category_id = 1
+
+    // URLs
+    const val PLUGIN_MARKETPLACE_URL = "https://plugins.jetbrains.com/plugin/24628-astagfirullah"
+    const val DEVELOPER_LINKEDIN_URL = "https://www.linkedin.com/in/alfayedoficial"
+    const val LINKEDIN_SHARE_BASE_URL = "https://www.linkedin.com/shareArticle?mini=true&url="
+
+    // Resources
+    const val BLESSING_AUDIO_PATH = "/raw/mohmmed.wav"
+    const val PLUGIN_ICON_PATH = "/icons/pluginIconSmall.svg"
+
+    // Default Settings
+    const val DEFAULT_LANGUAGE = "العربية"
+    const val DEFAULT_DELAY_SECONDS = "1.5"
+    const val DEFAULT_DELAY_MILLIS = 1500L
+    const val DEFAULT_SOUND_ENABLED = false
+    const val DEFAULT_SHOW_ON_STARTUP = true
+
+    // Display Configuration
+    const val PHRASES_PER_DISPLAY = 6
+    const val STARTUP_DISPLAY_SECONDS = 5
+
+    // Rating Prompt Timing (in milliseconds)
+    const val FIRST_RATING_DELAY_MS = 2 * 60 * 1000L          // 2 minutes
+    const val SECOND_RATING_DELAY_MS = 2 * 24 * 60 * 60 * 1000L // 2 days
+    const val REMIND_LATER_DELAY_MS = 10 * 60 * 1000L          // 10 minutes
+
+    // Rating States
+    const val RATING_STATE_FIRST = "1"
+    const val RATING_STATE_SECOND = "2"
+    const val RATING_STATE_DONE = "3"
+
+    // Notification
+    const val NOTIFICATION_GROUP_ID = "AstagfirullahNotifications"
+}

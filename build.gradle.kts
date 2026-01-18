@@ -6,7 +6,7 @@ plugins {
 
 
 group = "com.alfayedoficial"
-version = "1.1.4"
+version = "2.0.0"
 
 repositories {
    mavenCentral()
@@ -14,12 +14,10 @@ repositories {
 }
 
 dependencies {
-   implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
-   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
-   implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
-   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.1")
-   implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.20")
+   // Gson for JSON parsing (API responses)
+   implementation("com.google.code.gson:gson:2.10.1")
+
+   // Note: Kotlin stdlib and coroutines are provided by IntelliJ Platform
 }
 
 intellij {
@@ -40,7 +38,7 @@ tasks {
 
    patchPluginXml {
       sinceBuild.set("231")
-      untilBuild.set("252.*")
+      untilBuild.set("253.*")
    }
 
    signPlugin {
