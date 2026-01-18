@@ -2,9 +2,11 @@ package com.alfayedoficial.astagfirullah
 
 import com.alfayedoficial.astagfirullah.TranslatePhrases.selectTranslateTitle
 import com.alfayedoficial.astagfirullah.TranslatePhrases.selectedTranslatePhrases
+import com.alfayedoficial.astagfirullah.core.Constants
 import com.intellij.build.BuildProgressListener
 import com.intellij.build.events.BuildEvent
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -13,121 +15,89 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.io.BufferedInputStream
-import java.io.FileNotFoundException
-import java.io.InputStream
-import javax.sound.sampled.AudioSystem
+import java.util.concurrent.atomic.AtomicBoolean
 
-
+/**
+ * Service that displays Islamic phrases during build progress events.
+ * Integrates with IntelliJ's build system to show remembrance phrases.
+ */
 @Service(Service.Level.PROJECT)
-class BuildProgressService(val project: Project) : BuildProgressListener {
+class BuildProgressService(private val project: Project) : BuildProgressListener {
 
-   companion object {
-      @Volatile
-      private var isTaskRunning = false
-   }
+    private val logger = Logger.getInstance(BuildProgressService::class.java)
 
-   private fun isAnyTaskRunning(): Boolean {
-      return ProgressManager.getInstance().hasProgressIndicator()
-   }
+    companion object {
+        private val isTaskRunning = AtomicBoolean(false)
+    }
 
-   private fun playSound() {
-      try {
-         val inputStream: InputStream? = this::class.java.getResourceAsStream("/raw/mohmmed.wav")
-         if (inputStream != null) {
-            val bufferedInputStream = BufferedInputStream(inputStream)
-            val audioInputStream = AudioSystem.getAudioInputStream(bufferedInputStream)
-            val clip = AudioSystem.getClip()
-            clip.open(audioInputStream)
-            clip.start()
-         } else {
-            throw FileNotFoundException("Resource not found: /raw/mohmmed.wav")
-         }
-      } catch (e: Exception) {
-         e.printStackTrace()
-      }
-   }
+    private fun isAnyTaskRunning(): Boolean {
+        return ProgressManager.getInstance().hasProgressIndicator()
+    }
 
-   @Synchronized
-   override fun onEvent(buildId: Any, event: BuildEvent) {
-      handleTask()
-   }
+    override fun onEvent(buildId: Any, event: BuildEvent) {
+        handleTask()
+    }
 
-   fun onSyncEvent() {
-      handleTask()
-   }
+    fun onSyncEvent() {
+        handleTask()
+    }
 
-   /**
-    * Display random phrases when the IDE opens.
-    * This method is called when the IDE starts.
-    * Displays phrases for 5 seconds.
-    */
-   fun displayPhrasesOnStartup() {
-      // Use a fixed 5-second duration for startup display
-      handleTask(5)
-   }
+    /**
+     * Display random phrases when the IDE opens.
+     * Uses a fixed duration for startup display.
+     */
+    fun displayPhrasesOnStartup() {
+        handleTask(Constants.STARTUP_DISPLAY_SECONDS)
+    }
 
-   private fun handleTask(maxDurationSeconds: Int = -1) {
-      if (!isTaskRunning && !isAnyTaskRunning()) {
-         isTaskRunning = true
-         ProgressManager.getInstance().run(object : Task.Backgroundable(project, selectTranslateTitle(), false) {
+    private fun handleTask(maxDurationSeconds: Int = -1) {
+        // Use compareAndSet for thread-safe check-and-set operation
+        if (!isTaskRunning.compareAndSet(false, true)) {
+            return // Already running
+        }
+
+        if (isAnyTaskRunning()) {
+            isTaskRunning.set(false)
+            return
+        }
+
+        ProgressManager.getInstance().run(object : Task.Backgroundable(project, selectTranslateTitle(), false) {
             override fun run(indicator: ProgressIndicator) {
-               try {
-                  runBlocking {
-                     withContext(Dispatchers.Default) {
+                try {
+                    runBlocking {
+                        withContext(Dispatchers.Default) {
+                            val settings = AstagfirullahSettings.getInstance()
+                            val phrases = selectedTranslatePhrases()
 
-                        val phrases = selectedTranslatePhrases()
-                        val delay = if (maxDurationSeconds > 0) {
-                           // Calculate delay based on max duration and number of phrases
-                           val totalMillis = maxDurationSeconds * 1000
-                           val delayPerPhrase = totalMillis / phrases.size
-                           delayPerPhrase.toLong()
-                        } else {
-                           convertSECONDSToMillis(PropertiesManager.getPreferredDelaySeconds())
+                            val delayMs = if (maxDurationSeconds > 0) {
+                                (maxDurationSeconds * 1000L) / phrases.size
+                            } else {
+                                settings.getDelayMillis()
+                            }
+
+                            // Play sound at the start
+                            AudioService.getInstance().playBlessingSound()
+
+                            // Display phrases with progress
+                            for (i in phrases.indices) {
+                                indicator.text = phrases[i]
+                                indicator.fraction = (i + 1) / phrases.size.toDouble()
+                                delay(delayMs)
+                            }
+
+                            // Record statistics
+                            StatisticsService.getInstance().recordPhrasesDisplayed(
+                                count = phrases.size,
+                                language = settings.language
+                            )
                         }
-
-                        if (PropertiesManager.isSoundEnabled()) playSound() // Play sound at the start
-
-                        for (i in phrases.indices) {
-                           indicator.text = phrases[i]
-                           indicator.fraction = (i + 1) / phrases.size.toDouble()
-                           delay(delay) // Adjust the delay as needed
-                        }
-                     }
-                  }
-               } finally {
-                  isTaskRunning = false
-               }
+                    }
+                } catch (e: Exception) {
+                    logger.error("Error displaying phrases", e)
+                } finally {
+                    isTaskRunning.set(false)
+                }
             }
-         })
-
-      }
-   }
-
-   private fun convertSECONDSToMillis(preferredDelaySECONDS: String): Long {
-      return when (preferredDelaySECONDS) {
-         "1" -> 1000
-         "1.5" -> 1500
-         "2" -> 2000
-         "2.5" -> 2500
-         "3" -> 3000
-         "3.5" -> 3500
-         "4" -> 4000
-         "4.5" -> 4500
-         "5" -> 5000
-         "5.5" -> 5500
-         "6" -> 6000
-         "6.5" -> 6500
-         "7" -> 7000
-         "7.5" -> 7500
-         "8" -> 8000
-         "8.5" -> 8500
-         "9" -> 9000
-         "9.5" -> 9500
-         "10" -> 10000
-         else -> {
-            1000
-         }
-      }
-   }
+        })
+    }
 }
