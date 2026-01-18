@@ -103,6 +103,7 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     <li><b>IMPROVED:</b> Production-ready logging (debug logs hidden in release)</li>
     <li><b>IMPROVED:</b> Plugin description with better documentation</li>
     <li><b>IMPROVED:</b> Architecture with clean data layer separation</li>
+    <li><b>IMPROVED:</b> Extended IDE compatibility to version 253 (IntelliJ 2025.3)</li>
     <li><b>FIXED:</b> JSON parsing error for API responses</li>
     <li><b>FIXED:</b> Rating notification showing repeatedly</li>
 </ul>
@@ -133,6 +134,9 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     <!-- Product and plugin compatibility requirements. -->
     <depends>com.intellij.modules.platform</depends>
 
+    <!-- Resource bundle for i18n -->
+    <resource-bundle>messages.AstagfirullahBundle</resource-bundle>
+
     <!-- Extension points defined by the plugin. -->
     <extensions defaultExtensionNs="com.intellij">
 
@@ -143,17 +147,11 @@ spiritual reflection with supplications, glorification, and blessings upon the P
         <!-- Application-level service for settings persistence -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.AstagfirullahSettings"/>
 
-        <!-- Application-level service for audio playback -->
-        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.AudioService"/>
-
         <!-- Application-level service for statistics tracking -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.StatisticsService"/>
 
         <!-- Application-level service for API phrase caching -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.PraiseCacheService"/>
-
-        <!-- Application-level service for API synchronization -->
-        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.sync.PraiseSyncService"/>
 
         <!-- Tool Window for displaying phrases and statistics -->
         <toolWindow id="Astagfirullah"
@@ -167,16 +165,15 @@ spiritual reflection with supplications, glorification, and blessings upon the P
                 parentId="tools"
                 instance="com.alfayedoficial.astagfirullah.AstagfirullahConfigurable"
                 id="com.alfayedoficial.astagfirullah.settings"
-                displayName="Astagfirullah"/>
+                key="configurable.displayName"
+                bundle="messages.AstagfirullahBundle"/>
 
     </extensions>
     <!-- Add new action to Tools menu -->
 
     <actions>
-        <action id="com.alfayedoficial.astagfirullah.AstagfirullahAppAction"
+        <action id="Astagfirullah"
                 class="com.alfayedoficial.astagfirullah.AstagfirullahAppAction"
-                text="Astagfirullah"
-                description="Settings for Astagfirullah"
                 icon="/icons/pluginIconSmall.svg">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
