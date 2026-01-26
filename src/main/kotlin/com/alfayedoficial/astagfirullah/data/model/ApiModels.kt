@@ -77,3 +77,37 @@ object CategoryIds {
     const val GENERAL = 1  // Filter by this category
     const val AFTER_PRAYER = 2
 }
+
+// ==================== Settings API Models ====================
+
+/**
+ * Settings API Response wrapper
+ */
+data class SettingsApiResponse(
+    @SerializedName("status") val status: Boolean,
+    @SerializedName("message") val message: String,
+    @SerializedName("data") val data: SettingsData?
+)
+
+/**
+ * Settings data from the server
+ * Contains plugin version info and praise database version
+ */
+data class SettingsData(
+    @SerializedName("id") val id: Int,
+    @SerializedName("app_type") val appType: String,
+    @SerializedName("version_code") val versionCode: Int,
+    @SerializedName("version_name") val versionName: String,
+    @SerializedName("praise_version") val praiseVersion: Int,
+    @SerializedName("update_type") val updateType: String,  // "NORMAL" or "EMERGENCY"
+    @SerializedName("update_url") val updateUrl: String?,
+    @SerializedName("is_active") val isActive: Boolean
+)
+
+/**
+ * Update type constants
+ */
+object UpdateType {
+    const val NORMAL = "NORMAL"
+    const val EMERGENCY = "EMERGENCY"
+}

@@ -2,8 +2,14 @@ package com.alfayedoficial.astagfirullah
 
 import com.alfayedoficial.astagfirullah.core.BrowserUtil
 import com.alfayedoficial.astagfirullah.core.Constants
+import com.alfayedoficial.astagfirullah.data.api.SettingsApiService
+import com.alfayedoficial.astagfirullah.data.cache.PluginUpdateCacheService
 import com.alfayedoficial.astagfirullah.data.cache.PraiseCacheService
+import com.alfayedoficial.astagfirullah.data.sync.PraiseSyncService
+import com.alfayedoficial.astagfirullah.ui.auth.AuthPanel
+import com.alfayedoficial.astagfirullah.ui.leaderboard.LeaderboardPanel
 import com.intellij.openapi.options.Configurable
+import javax.swing.SwingUtilities
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.JBColor
@@ -27,8 +33,19 @@ class AstagfirullahConfigurable : Configurable {
     private val settings = AstagfirullahSettings.getInstance()
     private val statistics = StatisticsService.getInstance()
     private val cacheService = PraiseCacheService.getInstance()
+    private val updateCacheService = PluginUpdateCacheService.getInstance()
 
     private var mainPanel: JPanel? = null
+
+    // Sync UI components
+    private var syncStatusLabel: JBLabel? = null
+    private var syncButton: JButton? = null
+    private var updateStatusLabel: JBLabel? = null
+    private var updateButton: JButton? = null
+    private var praiseVersionLabel: JBLabel? = null
+    private var pluginVersionLabel: JBLabel? = null
+    private var cachedPhrasesLabel: JBLabel? = null
+    private var lastSyncLabel: JBLabel? = null
     private lateinit var languageComboBox: ComboBox<String>
     private lateinit var delayComboBox: ComboBox<String>
     private lateinit var soundCheckBox: JCheckBox
@@ -36,18 +53,62 @@ class AstagfirullahConfigurable : Configurable {
 
     override fun getDisplayName(): String = Constants.PLUGIN_NAME
 
-    override fun createComponent(): JComponent {
-        val tabbedPane = JBTabbedPane()
+    // Auth and Leaderboard panels
+    private var authPanel: AuthPanel? = null
+    private var leaderboardPanel: LeaderboardPanel? = null
+    private var tabbedPane: JBTabbedPane? = null
 
-        tabbedPane.addTab("Settings", createSettingsTab())
-        tabbedPane.addTab("Statistics", createStatisticsTab())
-        tabbedPane.addTab("About", createAboutTab())
+    companion object {
+        private const val TAB_INDEX_ACCOUNT = 1
+        private const val TAB_INDEX_LEADERBOARD = 4
+    }
+
+    override fun createComponent(): JComponent {
+        tabbedPane = JBTabbedPane()
+
+        tabbedPane!!.addTab("Settings", createSettingsTab())
+        tabbedPane!!.addTab("Account", createAccountTab())
+        tabbedPane!!.addTab("Sync & Updates", createSyncUpdatesTab())
+        tabbedPane!!.addTab("Statistics", createStatisticsTab())
+        tabbedPane!!.addTab("Leaderboard", createLeaderboardTab())
+        tabbedPane!!.addTab("About", createAboutTab())
 
         mainPanel = JPanel(BorderLayout()).apply {
-            add(tabbedPane, BorderLayout.CENTER)
+            add(tabbedPane!!, BorderLayout.CENTER)
         }
 
         return mainPanel!!
+    }
+
+    /**
+     * Navigates to the Account tab (login).
+     */
+    private fun navigateToAccountTab() {
+        tabbedPane?.selectedIndex = TAB_INDEX_ACCOUNT
+    }
+
+    /**
+     * Creates the Account tab with login/register/profile functionality.
+     */
+    private fun createAccountTab(): JComponent {
+        authPanel = AuthPanel()
+        // When user logs in, refresh the leaderboard panel
+        authPanel!!.setOnAuthSuccess { _ ->
+            leaderboardPanel?.onUserLoggedIn()
+        }
+        return JScrollPane(authPanel).apply {
+            border = null
+        }
+    }
+
+    /**
+     * Creates the Leaderboard tab with top users display.
+     */
+    private fun createLeaderboardTab(): JComponent {
+        leaderboardPanel = LeaderboardPanel(
+            onNavigateToLogin = { navigateToAccountTab() }
+        )
+        return leaderboardPanel!!
     }
 
     private fun createSettingsTab(): JComponent {
@@ -137,6 +198,168 @@ class AstagfirullahConfigurable : Configurable {
         }
     }
 
+    private fun createSyncUpdatesTab(): JComponent {
+        val panel = JPanel(BorderLayout())
+        panel.border = JBUI.Borders.empty(20)
+
+        val contentPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        }
+
+        // Plugin Version Section
+        contentPanel.add(TitledSeparator("Plugin Version"))
+        contentPanel.add(Box.createVerticalStrut(10))
+
+        val versionPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            border = JBUI.Borders.emptyLeft(10)
+            alignmentX = Component.LEFT_ALIGNMENT
+        }
+
+        // Current version row
+        val currentVersionPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+            alignmentX = Component.LEFT_ALIGNMENT
+            add(JBLabel("Current version: "))
+            pluginVersionLabel = JBLabel(Constants.PLUGIN_VERSION).apply {
+                font = font.deriveFont(Font.BOLD)
+                foreground = JBColor(Color(76, 175, 80), Color(76, 175, 80))
+            }
+            add(pluginVersionLabel!!)
+        }
+        versionPanel.add(currentVersionPanel)
+        versionPanel.add(Box.createVerticalStrut(10))
+
+        // Update status row
+        val updateStatusPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+            alignmentX = Component.LEFT_ALIGNMENT
+        }
+
+        val isUpdateAvailable = checkUpdateAvailable()
+        val latestVersion = updateCacheService.getLatestVersionName()
+
+        if (isUpdateAvailable && latestVersion.isNotEmpty()) {
+            updateStatusLabel = JBLabel("New version available: v$latestVersion").apply {
+                foreground = JBColor(Color(255, 152, 0), Color(255, 193, 7))
+                font = font.deriveFont(Font.BOLD)
+            }
+            updateStatusPanel.add(updateStatusLabel!!)
+            updateStatusPanel.add(Box.createHorizontalStrut(15))
+
+            updateButton = JButton("Update Now").apply {
+                cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                addActionListener {
+                    val url = updateCacheService.getUpdateUrl().ifEmpty { Constants.PLUGIN_MARKETPLACE_URL }
+                    BrowserUtil.openUrl(url)
+                }
+            }
+            updateStatusPanel.add(updateButton!!)
+        } else {
+            updateStatusLabel = JBLabel("Plugin is up to date").apply {
+                foreground = JBColor(Color(76, 175, 80), Color(76, 175, 80))
+            }
+            updateStatusPanel.add(updateStatusLabel!!)
+        }
+        versionPanel.add(updateStatusPanel)
+        contentPanel.add(versionPanel)
+
+        // Praise Sync Section
+        contentPanel.add(Box.createVerticalStrut(25))
+        contentPanel.add(TitledSeparator("Praise Database"))
+        contentPanel.add(Box.createVerticalStrut(10))
+
+        val praisePanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            border = JBUI.Borders.emptyLeft(10)
+            alignmentX = Component.LEFT_ALIGNMENT
+        }
+
+        // Praise version info
+        val praiseInfoPanel = JPanel(GridLayout(3, 2, 10, 8)).apply {
+            alignmentX = Component.LEFT_ALIGNMENT
+            add(JBLabel("Cached phrases:"))
+            cachedPhrasesLabel = JBLabel("${cacheService.getCachedPraises().size} phrases")
+            add(cachedPhrasesLabel!!)
+            add(JBLabel("Database version:"))
+            praiseVersionLabel = JBLabel("v${cacheService.getCurrentVersion()}")
+            add(praiseVersionLabel!!)
+            add(JBLabel("Last sync:"))
+            lastSyncLabel = JBLabel(getLastSyncText())
+            add(lastSyncLabel!!)
+        }
+        praisePanel.add(praiseInfoPanel)
+        praisePanel.add(Box.createVerticalStrut(15))
+
+        // Sync status and button
+        val syncPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+            alignmentX = Component.LEFT_ALIGNMENT
+        }
+
+        syncStatusLabel = JBLabel("Ready to sync")
+        syncPanel.add(syncStatusLabel!!)
+        syncPanel.add(Box.createHorizontalStrut(15))
+
+        syncButton = JButton("Sync Now").apply {
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            addActionListener { performSync() }
+        }
+        syncPanel.add(syncButton!!)
+
+        praisePanel.add(syncPanel)
+        contentPanel.add(praisePanel)
+
+        // Cache Management Section
+        contentPanel.add(Box.createVerticalStrut(25))
+        contentPanel.add(TitledSeparator("Cache Management"))
+        contentPanel.add(Box.createVerticalStrut(10))
+
+        val cachePanel = JPanel(FlowLayout(FlowLayout.LEFT)).apply {
+            border = JBUI.Borders.emptyLeft(10)
+            alignmentX = Component.LEFT_ALIGNMENT
+
+            add(JButton("Clear All Cache").apply {
+                addActionListener {
+                    val result = JOptionPane.showConfirmDialog(
+                        panel,
+                        "This will clear all cached phrases and update info. Continue?",
+                        "Clear Cache",
+                        JOptionPane.YES_NO_OPTION
+                    )
+                    if (result == JOptionPane.YES_OPTION) {
+                        cacheService.clearCache()
+                        updateCacheService.clearCache()
+                        JOptionPane.showMessageDialog(panel, "Cache cleared successfully!")
+                        refreshSyncUI()
+                    }
+                }
+            })
+        }
+        contentPanel.add(cachePanel)
+
+        // Info panel
+        contentPanel.add(Box.createVerticalStrut(25))
+        val infoPanel = JPanel(BorderLayout()).apply {
+            background = JBColor(Color(240, 240, 240), Color(60, 63, 65))
+            border = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(JBColor.border(), 1),
+                JBUI.Borders.empty(10)
+            )
+        }
+
+        val infoLabel = JBLabel("<html>" +
+                "<b>Info:</b> The plugin automatically syncs once per day on IDE startup.<br>" +
+                "Use 'Sync Now' to manually fetch the latest praises and check for plugin updates." +
+                "</html>")
+        infoLabel.foreground = UIUtil.getContextHelpForeground()
+        infoPanel.add(infoLabel)
+        contentPanel.add(infoPanel)
+
+        panel.add(contentPanel, BorderLayout.NORTH)
+
+        return JScrollPane(panel).apply {
+            border = null
+        }
+    }
+
     private fun createStatisticsTab(): JComponent {
         val panel = JPanel(BorderLayout())
         panel.border = JBUI.Borders.empty(20)
@@ -185,22 +408,7 @@ class AstagfirullahConfigurable : Configurable {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
             border = JBUI.Borders.emptyTop(20)
 
-            add(TitledSeparator("Cache Information"))
-            add(Box.createVerticalStrut(10))
-
-            val cacheInfo = JPanel(GridLayout(3, 2, 10, 5)).apply {
-                border = JBUI.Borders.emptyLeft(10)
-                add(JBLabel("Cached phrases:"))
-                add(JBLabel("${cacheService.getCachedPraises().size} phrases"))
-                add(JBLabel("Cache version:"))
-                add(JBLabel("v${cacheService.getCurrentVersion()}"))
-                add(JBLabel("Last sync:"))
-                add(JBLabel(getLastSyncText()))
-            }
-            add(cacheInfo)
-
             // Usage streak
-            add(Box.createVerticalStrut(20))
             add(TitledSeparator("Usage"))
             add(Box.createVerticalStrut(10))
 
@@ -218,26 +426,6 @@ class AstagfirullahConfigurable : Configurable {
 
         centerPanel.add(infoSection, BorderLayout.CENTER)
         panel.add(centerPanel, BorderLayout.CENTER)
-
-        // Reset button
-        val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT)).apply {
-            border = JBUI.Borders.emptyTop(10)
-            add(JButton("Clear Cache").apply {
-                addActionListener {
-                    val result = JOptionPane.showConfirmDialog(
-                        panel,
-                        "This will clear all cached phrases. Continue?",
-                        "Clear Cache",
-                        JOptionPane.YES_NO_OPTION
-                    )
-                    if (result == JOptionPane.YES_OPTION) {
-                        cacheService.clearCache()
-                        JOptionPane.showMessageDialog(panel, "Cache cleared successfully!")
-                    }
-                }
-            })
-        }
-        panel.add(buttonPanel, BorderLayout.SOUTH)
 
         return JScrollPane(panel).apply {
             border = null
@@ -270,10 +458,38 @@ class AstagfirullahConfigurable : Configurable {
         contentPanel.add(Box.createVerticalStrut(5))
 
         // Version
-        val versionPanel = JPanel(FlowLayout(FlowLayout.CENTER)).apply {
-            add(JBLabel("Version ${Constants.PLUGIN_VERSION}").apply {
-                foreground = UIUtil.getContextHelpForeground()
-            })
+        val versionPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            alignmentX = Component.CENTER_ALIGNMENT
+
+            val currentVersionLabel = JPanel(FlowLayout(FlowLayout.CENTER)).apply {
+                add(JBLabel("Version ${Constants.PLUGIN_VERSION}").apply {
+                    foreground = UIUtil.getContextHelpForeground()
+                })
+            }
+            add(currentVersionLabel)
+
+            // Show update available badge if applicable
+            val latestVersion = updateCacheService.getLatestVersionName()
+            if (latestVersion.isNotEmpty() && checkUpdateAvailable()) {
+                add(Box.createVerticalStrut(5))
+                val updatePanel = JPanel(FlowLayout(FlowLayout.CENTER)).apply {
+                    val updateLabel = JBLabel("Update available: v$latestVersion").apply {
+                        foreground = JBColor(Color(255, 152, 0), Color(255, 193, 7))
+                        font = font.deriveFont(Font.BOLD, 11f)
+                    }
+                    add(updateLabel)
+                    add(Box.createHorizontalStrut(8))
+                    add(JButton("Update").apply {
+                        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                        addActionListener {
+                            val url = updateCacheService.getUpdateUrl().ifEmpty { Constants.PLUGIN_MARKETPLACE_URL }
+                            BrowserUtil.openUrl(url)
+                        }
+                    })
+                }
+                add(updatePanel)
+            }
         }
         contentPanel.add(versionPanel)
         contentPanel.add(Box.createVerticalStrut(20))
@@ -450,6 +666,96 @@ class AstagfirullahConfigurable : Configurable {
             ChronoUnit.DAYS.between(installDate, LocalDate.now())
         } else {
             0
+        }
+    }
+
+    /**
+     * Checks if a plugin update is available.
+     */
+    private fun checkUpdateAvailable(): Boolean {
+        val latestVersion = updateCacheService.getLatestVersionName()
+        if (latestVersion.isEmpty()) return false
+        return SettingsApiService.isUpdateAvailable(Constants.PLUGIN_VERSION, latestVersion)
+    }
+
+    /**
+     * Performs sync operation in background.
+     */
+    private fun performSync() {
+        syncButton?.isEnabled = false
+        syncStatusLabel?.text = "Syncing..."
+        syncStatusLabel?.foreground = JBColor(Color(33, 150, 243), Color(33, 150, 243))
+
+        Thread {
+            var resultText = ""
+            var isSuccess = false
+
+            try {
+                val syncService = PraiseSyncService.getInstance()
+                // Run the suspend function in a blocking way
+                val result = kotlinx.coroutines.runBlocking {
+                    syncService.forceSync()
+                }
+
+                when (result) {
+                    is PraiseSyncService.SyncResult.Success -> {
+                        resultText = "Synced ${result.phraseCount} phrases (v${result.version})"
+                        isSuccess = true
+                    }
+                    is PraiseSyncService.SyncResult.AlreadyUpToDate -> {
+                        resultText = "Already up to date (v${result.version})"
+                        isSuccess = true
+                    }
+                    is PraiseSyncService.SyncResult.Error -> {
+                        resultText = "Sync failed: ${result.message}"
+                        isSuccess = false
+                    }
+                }
+            } catch (e: Exception) {
+                resultText = "Sync failed: ${e.message ?: "Unknown error"}"
+                isSuccess = false
+            }
+
+            // Update UI on EDT - capture values for lambda
+            val finalResultText = resultText
+            val finalIsSuccess = isSuccess
+
+            SwingUtilities.invokeLater {
+                syncStatusLabel?.text = finalResultText
+                syncStatusLabel?.foreground = if (finalIsSuccess) {
+                    JBColor(Color(76, 175, 80), Color(76, 175, 80))
+                } else {
+                    JBColor(Color(244, 67, 54), Color(244, 67, 54))
+                }
+                syncButton?.isEnabled = true
+                refreshSyncUI()
+            }
+        }.start()
+    }
+
+    /**
+     * Refreshes the sync UI after a sync operation.
+     */
+    private fun refreshSyncUI() {
+        // Update praise database labels
+        praiseVersionLabel?.text = "v${cacheService.getCurrentVersion()}"
+        cachedPhrasesLabel?.text = "${cacheService.getCachedPraises().size} phrases"
+        lastSyncLabel?.text = getLastSyncText()
+
+        // Update update status
+        val isUpdateAvailable = checkUpdateAvailable()
+        val latestVersion = updateCacheService.getLatestVersionName()
+
+        if (isUpdateAvailable && latestVersion.isNotEmpty()) {
+            updateStatusLabel?.text = "Update available: v$latestVersion"
+            updateStatusLabel?.foreground = JBColor(Color(255, 152, 0), Color(255, 193, 7))
+            updateStatusLabel?.font = updateStatusLabel?.font?.deriveFont(Font.BOLD)
+            updateButton?.isVisible = true
+        } else if (latestVersion.isNotEmpty()) {
+            updateStatusLabel?.text = "Plugin is up to date"
+            updateStatusLabel?.foreground = JBColor(Color(76, 175, 80), Color(76, 175, 80))
+            updateStatusLabel?.font = updateStatusLabel?.font?.deriveFont(Font.PLAIN)
+            updateButton?.isVisible = false
         }
     }
 

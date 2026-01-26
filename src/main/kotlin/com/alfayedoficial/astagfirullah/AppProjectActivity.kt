@@ -3,6 +3,7 @@ package com.alfayedoficial.astagfirullah
 import com.alfayedoficial.astagfirullah.data.sync.PraiseSyncService
 import com.intellij.ProjectTopics
 import com.intellij.build.BuildViewManager
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Activity that runs when a project is opened.
- * Initializes build listeners, syncs phrases from API, and displays startup phrases.
+ * Initializes build listeners, syncs phrases from API, checks for updates, and displays startup phrases.
  */
 class AppProjectActivity : ProjectActivity {
 
@@ -31,8 +32,8 @@ class AppProjectActivity : ProjectActivity {
         // Register build listener
         buildViewManager.addListener(buildProgressService, disposable)
 
-        // Sync phrases from API in background (daily sync with version check)
-        syncPhrasesInBackground()
+        // Sync phrases from API and check for updates in background
+        syncAndCheckUpdates(project)
 
         // Display phrases on startup
         buildProgressService.displayPhrasesOnStartup()
@@ -49,13 +50,26 @@ class AppProjectActivity : ProjectActivity {
     }
 
     /**
-     * Syncs phrases from API in background.
+     * Syncs phrases from API and checks for plugin updates in background.
      * Uses version-based sync to minimize network requests.
      */
-    private fun syncPhrasesInBackground() {
+    private fun syncAndCheckUpdates(project: Project) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val syncService = PraiseSyncService.getInstance()
+
+                // Set up callback for update notifications
+                syncService.onUpdateAvailable = { updateInfo ->
+                    ApplicationManager.getApplication().invokeLater {
+                        try {
+                            UpdateNotificationService.getInstance()
+                                .showUpdateNotification(updateInfo, project)
+                        } catch (e: Exception) {
+                            logger.warn("Failed to show update notification", e)
+                        }
+                    }
+                }
+
                 val result = syncService.syncIfNeeded()
 
                 when (result) {

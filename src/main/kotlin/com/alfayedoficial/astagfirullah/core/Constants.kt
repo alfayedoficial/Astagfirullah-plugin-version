@@ -8,14 +8,39 @@ object Constants {
 
     // Plugin Information
     const val PLUGIN_ID = "com.alfayedoficial.astagfirullah"
-    const val PLUGIN_VERSION = "2.0.0"
+    const val PLUGIN_VERSION = "2.0.1"
     const val PLUGIN_NAME = "Astagfirullah"
 
     // API Configuration
     const val API_BASE_URL = "https://astaghfirullah.4fdev.com/api/v2"
+    const val API_BASE_URL_V1 = "https://astaghfirullah.4fdev.com/api/v1"  // Auth uses v1
     const val API_PRAISE_LIST_ENDPOINT = "/praise/list"
+    const val API_SETTINGS_ENDPOINT = "/settings"
     const val API_TIMEOUT_SECONDS = 30L
     const val API_CATEGORY_FILTER = 1  // Filter by category_id = 1
+    const val API_APP_TYPE = "JETBRAINS_PLUGIN"  // App type for settings API
+
+    // Auth API Endpoints (uses v1)
+    const val API_AUTH_LOGIN_ENDPOINT = "/auth/login"
+    const val API_AUTH_REGISTER_ENDPOINT = "/auth/register"
+    const val API_AUTH_ME_ENDPOINT = "/auth/me"
+    const val API_AUTH_LOGOUT_ENDPOINT = "/auth/logout"
+    const val API_AUTH_DELETE_ACCOUNT_ENDPOINT = "/auth/deleteAccount"
+
+    // Firebase Configuration (for anonymous auth)
+    const val FIREBASE_API_KEY = "AIzaSyDPGs_6FVQUpA0_cfgQ3qvpXOWMOLgAt5g" // Replace with actual key
+    const val FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
+
+    // Leaderboard API Endpoints (uses v1)
+    const val API_LEADERBOARD_ENDPOINT = "/statistic/top-users"
+    const val API_STATISTIC_CREATE_ENDPOINT = "/statistic/create"
+    const val LEADERBOARD_DEFAULT_LIMIT = 50
+    const val LEADERBOARD_TOOL_WINDOW_LIMIT = 5
+
+    // Validation Constants
+    const val MIN_PASSWORD_LENGTH = 8
+    const val MAX_NAME_LENGTH = 100
+    const val EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$"
 
     // URLs
     const val PLUGIN_MARKETPLACE_URL = "https://plugins.jetbrains.com/plugin/24628-astagfirullah"

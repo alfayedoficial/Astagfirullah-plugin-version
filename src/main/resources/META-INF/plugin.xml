@@ -6,7 +6,7 @@
 
     <vendor email="alialfayed.official@gmail.com" url="https://www.linkedin.com/in/alfayedoficial">Ali Al-Shahat Ali</vendor>
 
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 
     <category>Education</category>
 
@@ -86,6 +86,21 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     ]]></description>
 
     <change-notes><![CDATA[
+<h3>Version 2.0.1 - Authentication & Leaderboard</h3>
+<p><i>User accounts and global rankings</i></p>
+<ul>
+    <li><b>NEW:</b> User Authentication - Login and Register with email</li>
+    <li><b>NEW:</b> Global Leaderboard - Compete with users worldwide</li>
+    <li><b>NEW:</b> Smart Update Notifications with dismiss options</li>
+    <li><b>NEW:</b> Leaderboard UI with medal rankings (Gold, Silver, Bronze)</li>
+    <li><b>IMPROVED:</b> Praise filtering by category from server</li>
+    <li><b>IMPROVED:</b> Version comparison utilities</li>
+    <li><b>IMPROVED:</b> API architecture with dedicated service layers</li>
+    <li><b>IMPROVED:</b> Form validation with real-time feedback</li>
+    <li><b>IMPROVED:</b> Cache management for offline support</li>
+    <li><b>FIXED:</b> Sync reliability with version-based filtering</li>
+</ul>
+
 <h3>Version 2.0.0 - Major Release</h3>
 <p><i>Complete UI overhaul with professional settings and statistics</i></p>
 <ul>
@@ -152,6 +167,33 @@ spiritual reflection with supplications, glorification, and blessings upon the P
 
         <!-- Application-level service for API phrase caching -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.PraiseCacheService"/>
+
+        <!-- Application-level service for plugin update caching -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.PluginUpdateCacheService"/>
+
+        <!-- Application-level service for phrase and update sync -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.sync.PraiseSyncService"/>
+
+        <!-- Application-level service for update notifications -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.UpdateNotificationService"/>
+
+        <!-- Application-level service for authentication caching -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.AuthCacheService"/>
+
+        <!-- Application-level service for leaderboard caching -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.LeaderboardCacheService"/>
+
+        <!-- Application-level service for authentication sync -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.sync.AuthSyncService"/>
+
+        <!-- Application-level service for leaderboard sync -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.sync.LeaderboardSyncService"/>
+
+        <!-- Notification group for update notifications -->
+        <notificationGroup id="AstagfirullahNotifications"
+                           displayType="BALLOON"
+                           bundle="messages.AstagfirullahBundle"
+                           key="notification.group.name"/>
 
         <!-- Tool Window for displaying phrases and statistics -->
         <toolWindow id="Astagfirullah"
