@@ -17,6 +17,7 @@ import javax.sound.sampled.LineEvent
 class AudioService {
 
     private val logger = Logger.getInstance(AudioService::class.java)
+    @Volatile
     private var currentClip: Clip? = null
 
     companion object {
@@ -52,17 +53,21 @@ class AudioService {
                 return
             }
 
-            val bufferedInputStream = BufferedInputStream(inputStream)
-            val audioInputStream = AudioSystem.getAudioInputStream(bufferedInputStream)
-
-            currentClip = AudioSystem.getClip().apply {
-                open(audioInputStream)
-                addLineListener { event ->
-                    if (event.type == LineEvent.Type.STOP) {
-                        event.line.close()
+            inputStream.use { rawStream ->
+                BufferedInputStream(rawStream).use { bufferedStream ->
+                    val audioInputStream = AudioSystem.getAudioInputStream(bufferedStream)
+                    audioInputStream.use { audioStream ->
+                        currentClip = AudioSystem.getClip().apply {
+                            open(audioStream)
+                            addLineListener { event ->
+                                if (event.type == LineEvent.Type.STOP) {
+                                    event.line.close()
+                                }
+                            }
+                            start()
+                        }
                     }
                 }
-                start()
             }
 
             logger.debug("Playing audio: $resourcePath")

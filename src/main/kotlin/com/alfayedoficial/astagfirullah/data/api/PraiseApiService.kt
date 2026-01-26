@@ -7,8 +7,6 @@ import com.alfayedoficial.astagfirullah.data.model.CategoryIds
 import com.alfayedoficial.astagfirullah.data.model.LanguageIds
 import com.google.gson.Gson
 import com.intellij.openapi.diagnostic.Logger
-import java.net.HttpURLConnection
-import java.net.URL
 
 /**
  * Service for fetching praises from the remote API.
@@ -27,42 +25,29 @@ object PraiseApiService {
      * @return ApiResult containing either the parsed response or an error
      */
     fun fetchPraises(currentVersion: Int): ApiResult {
-        val urlString = "${Constants.API_BASE_URL}${Constants.API_PRAISE_LIST_ENDPOINT}?version=$currentVersion"
+        val urlString = "${Constants.API_BASE_URL}${Constants.API_PRAISE_LIST_ENDPOINT}?version=$currentVersion&is_quran=false"
 
-        return try {
-            logger.debug("Fetching praises from API with version: $currentVersion")
+        logger.debug("Fetching praises from API with version: $currentVersion")
 
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-
-            connection.apply {
-                requestMethod = "GET"
-                connectTimeout = (Constants.API_TIMEOUT_SECONDS * 1000).toInt()
-                readTimeout = (Constants.API_TIMEOUT_SECONDS * 1000).toInt()
-                setRequestProperty("Accept", "application/json")
-                setRequestProperty("Content-Type", "application/json")
-            }
-
-            val responseCode = connection.responseCode
-
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val apiResponse = gson.fromJson(response, ApiResponse::class.java)
-
-                if (apiResponse.status && apiResponse.data != null) {
-                    logger.debug("API response: version=${apiResponse.data.version}, praises=${apiResponse.data.praises.size}")
-                    ApiResult.Success(apiResponse)
-                } else {
-                    logger.warn("API returned status=false: ${apiResponse.message}")
-                    ApiResult.Error("API error: ${apiResponse.message}")
+        return when (val httpResult = ApiHelper.get(urlString)) {
+            is ApiHelper.HttpResult.Success -> {
+                try {
+                    val apiResponse = gson.fromJson(httpResult.body, ApiResponse::class.java)
+                    if (apiResponse.status && apiResponse.data != null) {
+                        logger.debug("API response: version=${apiResponse.data.version}, praises=${apiResponse.data.praises.size}")
+                        ApiResult.Success(apiResponse)
+                    } else {
+                        logger.warn("API returned status=false: ${apiResponse.message}")
+                        ApiResult.Error("API error: ${apiResponse.message}")
+                    }
+                } catch (e: Exception) {
+                    logger.warn("Failed to parse API response", e)
+                    ApiResult.Error("Parse error: ${e.message}")
                 }
-            } else {
-                logger.warn("HTTP error: $responseCode")
-                ApiResult.Error("HTTP error: $responseCode")
             }
-        } catch (e: Exception) {
-            logger.warn("Failed to fetch praises from API", e)
-            ApiResult.Error("Network error: ${e.message}")
+            is ApiHelper.HttpResult.Error -> {
+                ApiResult.Error(httpResult.message)
+            }
         }
     }
 

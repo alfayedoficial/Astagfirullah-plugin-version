@@ -3,9 +3,9 @@ package com.alfayedoficial.astagfirullah
 import com.alfayedoficial.astagfirullah.core.BrowserUtil
 import com.alfayedoficial.astagfirullah.core.Constants
 import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -22,9 +22,11 @@ class RatePromptActivity : ProjectActivity {
 
     private val logger = Logger.getInstance(RatePromptActivity::class.java)
 
-    // Track if notification was already shown this session (per-instance to avoid companion object)
-    @Volatile
-    private var notificationShownThisSession = false
+    companion object {
+        // Track if notification was already shown this session (shared across all instances)
+        @Volatile
+        private var notificationShownThisSession = false
+    }
 
     override suspend fun execute(project: Project) {
         val settings = AstagfirullahSettings.getInstance()
@@ -76,51 +78,57 @@ class RatePromptActivity : ProjectActivity {
         notificationShownThisSession = true
         settings.lastRatingPromptTime = System.currentTimeMillis()
 
-        val notification = Notification(
-            Constants.NOTIFICATION_GROUP_ID,
-            "Enjoying ${Constants.PLUGIN_NAME}?",
-            "If you find this plugin useful, please consider rating it on the marketplace.",
-            NotificationType.INFORMATION
-        )
+        try {
+            val notification = NotificationGroupManager.getInstance()
+                .getNotificationGroup(Constants.NOTIFICATION_GROUP_ID)
+                .createNotification(
+                    "Enjoying ${Constants.PLUGIN_NAME}?",
+                    "If you find this plugin useful, please consider rating it on the marketplace.",
+                    NotificationType.INFORMATION
+                )
 
-        notification.addAction(object : AnAction("Rate Now") {
-            override fun actionPerformed(e: AnActionEvent) {
-                // User rated - mark as done
-                settings.ratingPrompted = true
-                settings.firstRatingTime = Constants.RATING_STATE_DONE
-                BrowserUtil.openPluginPage()
-                notification.expire()
-                logger.debug("User clicked Rate Now")
-            }
-        })
+            notification.addAction(object : NotificationAction("Rate Now") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    // User rated - mark as done
+                    settings.ratingPrompted = true
+                    settings.firstRatingTime = Constants.RATING_STATE_DONE
+                    BrowserUtil.openPluginPage()
+                    notification.expire()
+                    logger.debug("User clicked Rate Now")
+                }
+            })
 
-        notification.addAction(object : AnAction("Share on LinkedIn") {
-            override fun actionPerformed(e: AnActionEvent) {
-                BrowserUtil.shareOnLinkedIn()
-            }
-        })
+            notification.addAction(object : NotificationAction("Share on LinkedIn") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    BrowserUtil.shareOnLinkedIn()
+                }
+            })
 
-        notification.addAction(object : AnAction("Remind Me Later") {
-            override fun actionPerformed(e: AnActionEvent) {
-                // Advance to next state for later reminder
-                advanceRatingState(settings)
-                notification.expire()
-                logger.debug("User clicked Remind Me Later, state: ${settings.firstRatingTime}")
-            }
-        })
+            notification.addAction(object : NotificationAction("Remind Me Later") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    // Advance to next state for later reminder
+                    advanceRatingState(settings)
+                    notification.expire()
+                    logger.debug("User clicked Remind Me Later, state: ${settings.firstRatingTime}")
+                }
+            })
 
-        notification.addAction(object : AnAction("Don't Ask Again") {
-            override fun actionPerformed(e: AnActionEvent) {
-                // User dismissed permanently
-                settings.ratingPrompted = true
-                settings.firstRatingTime = Constants.RATING_STATE_DONE
-                notification.expire()
-                logger.debug("User clicked Don't Ask Again")
-            }
-        })
+            notification.addAction(object : NotificationAction("Don't Ask Again") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    // User dismissed permanently
+                    settings.ratingPrompted = true
+                    settings.firstRatingTime = Constants.RATING_STATE_DONE
+                    notification.expire()
+                    logger.debug("User clicked Don't Ask Again")
+                }
+            })
 
-        Notifications.Bus.notify(notification, project)
-        logger.debug("Rating notification displayed")
+            notification.notify(project)
+            logger.debug("Rating notification displayed")
+
+        } catch (e: Exception) {
+            logger.warn("Failed to show rating notification", e)
+        }
     }
 
     private fun advanceRatingState(settings: AstagfirullahSettings) {
