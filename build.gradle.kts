@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 
 plugins {
    id("java")
@@ -119,6 +121,28 @@ intellijPlatform {
    // declared branch; CI runs these one-per-job via a matrix, because verifying them all
    // on a single hosted runner exhausted its ~14 GB disk.
    pluginVerification {
+      // Fail on anything that can actually break at runtime, but NOT on
+      // INTERNAL_API_USAGES.
+      //
+      // The only internal usages reported are six Kotlin-generated interface bridges from
+      // AstagfirullahToolWindowFactory implementing ToolWindowFactory -- getAnchor(),
+      // getIcon() and manage(). The class overrides neither; they exist because Kotlin
+      // emits bridges for the interface's methods, and JetBrains marked those methods
+      // @Internal on 2024.2-2025.2 (they are not flagged on 2025.3+). They cannot be
+      // avoided without dropping the tool window entirely.
+      //
+      // COMPATIBILITY_PROBLEMS stays enabled, and it earns its keep: it is what caught the
+      // Kotlin 2.4 codegen emitting references to SpillingKt, which would have thrown
+      // NoSuchClassError on four of the seven supported IDEs.
+      failureLevel = listOf(
+         FailureLevel.COMPATIBILITY_PROBLEMS,
+         FailureLevel.INVALID_PLUGIN,
+         FailureLevel.MISSING_DEPENDENCIES,
+         FailureLevel.NON_EXTENDABLE_API_USAGES,
+         FailureLevel.OVERRIDE_ONLY_API_USAGES,
+         FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+      )
+
       ides {
          // CI overrides this with -PpluginVerifierIdeVersions=<one version> and runs one
          // IDE per matrix job. Verifying them all on a single hosted runner exhausted its
@@ -173,7 +197,24 @@ tasks {
       targetCompatibility = "21"
    }
    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+      compilerOptions {
+         jvmTarget.set(JvmTarget.JVM_21)
+
+         // The Kotlin 2.4 compiler is required to READ IntelliJ 2026.2's jars, but its
+         // default codegen emits references to kotlin.coroutines.jvm.internal.SpillingKt,
+         // which does NOT exist in the older Kotlin runtime bundled with IntelliJ
+         // 2024.2-2025.2. The Plugin Verifier caught it as a compatibility problem:
+         // "references an unresolved class ... SpillingKt ... can lead to NoSuchClassError
+         // at runtime" -- i.e. the plugin would have crashed on four of the seven IDEs it
+         // claims to support.
+         //
+         // Plugins must not bundle their own stdlib (kotlin.stdlib.default.dependency=false
+         // in gradle.properties), so the generated code has to stay within the API surface
+         // of the OLDEST bundled runtime in the supported range, not the newest. 2.0 is the
+         // lowest the Kotlin 2.4 compiler still accepts (1.9 is rejected outright).
+         apiVersion.set(KotlinVersion.KOTLIN_2_0)
+         languageVersion.set(KotlinVersion.KOTLIN_2_0)
+      }
    }
 
    test {
