@@ -66,9 +66,18 @@ tasks {
 
    // The compatibility range declared above is only a CLAIM until the Plugin Verifier
    // proves it. One IDE per declared branch, so a removed API is caught before release.
+   //
+   // CI overrides this with -PpluginVerifierIdeVersions=<single ide> and runs one IDE per
+   // matrix job. Verifying all ten on a single hosted runner exhausted its ~14 GB disk
+   // ("No space left on device") — each IDE download is well over a gigabyte. A matrix
+   // also gives each IDE a fresh disk, runs them in parallel, and makes a failure
+   // attributable to one specific IDE instead of the whole batch.
    runPluginVerifier {
+      val requested = providers.gradleProperty("pluginVerifierIdeVersions").orNull
+         ?.split(",")?.map(String::trim)?.filter(String::isNotEmpty)
+
       ideVersions.set(
-         listOf(
+         requested ?: listOf(
             "IC-2023.2.6", // sinceBuild floor (232)
             "IC-2023.3.8",
             "IC-2024.1.7",
