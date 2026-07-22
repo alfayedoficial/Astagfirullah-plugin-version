@@ -47,6 +47,17 @@ dependencies {
    // Gson for JSON parsing (API responses)
    implementation("com.google.code.gson:gson:2.10.1")
 
+   // JLayer — pure-Java MP3 decoder for the Quran audio player. The IDE's stock
+   // javax.sound.sampled cannot decode MP3, and the Quran audio (mp3quran.net) is MP3.
+   // We use JLayer's Decoder/Bitstream directly and write PCM to a SourceDataLine, rather
+   // than the mp3spi ServiceLoader route, which is unreliable across a plugin classloader.
+   implementation("com.googlecode.soundlibs:jlayer:1.0.1.4") {
+      // JLayer declares a compile dependency on junit 3.8.2, which would otherwise be
+      // bundled into the shipped plugin. A test framework must never leak into the runtime
+      // distribution.
+      exclude(group = "junit", module = "junit")
+   }
+
    // Note: Kotlin stdlib and coroutines are provided by IntelliJ Platform
 
    // Test dependencies.

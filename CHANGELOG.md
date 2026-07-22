@@ -11,6 +11,11 @@ Astagfirullah 3.0.0 is a major release that supersedes the never-published 2.1.0
 upgrading from 2.0.1 on the Marketplace, everything below is new to you.
 
 ### Added
+- **Quran Audio Player** — a dedicated Quran tool window to listen to the Holy Quran inside
+  the IDE. Pick from 200+ reciters (mp3quran.net), search any surah by name or number, and
+  play / pause / skip between surahs, streamed online with no downloads. Reciter and surah
+  names follow the plugin's language setting (all seven languages). MP3 is decoded in-process
+  with JLayer, since the IDE's stock audio stack cannot decode MP3
 - **Available Everywhere** — the plugin now surfaces the rest of the Astagfirullah family:
   the Android and iOS apps and the Chrome / Edge / Firefox browser extensions, linked from
   the developer's own sites [astaghfirullah.4fdev.com](https://astaghfirullah.4fdev.com/)

@@ -30,6 +30,14 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     <li>Dynamic phrases synced from server with offline support</li>
 </ul>
 
+<p><b>Quran Audio Player</b></p>
+<ul>
+    <li>Listen to the Holy Quran inside your IDE - a dedicated Quran tool window</li>
+    <li>Choose from 200+ reciters and search any surah by name or number</li>
+    <li>Play, pause and skip between surahs, streamed online with no downloads</li>
+    <li>Reciter and surah names follow your chosen language (Arabic, English, Urdu, Farsi, Turkish, Indonesian, Bengali)</li>
+</ul>
+
 <p><b>Daily Remembrance</b></p>
 <ul>
     <li>A gentle dhikr window when you open your IDE, once a day</li>
@@ -108,6 +116,7 @@ spiritual reflection with supplications, glorification, and blessings upon the P
 <h3>Version 3.0.0 - Everywhere You Are</h3>
 <p><i>A major release: latest-IDE support, a daily moment of remembrance, and the whole Astagfirullah family in one place</i></p>
 <ul>
+    <li><b>NEW:</b> Quran Audio Player - listen to the Holy Quran inside your IDE. Pick from 200+ reciters, search any surah, and play/pause/skip, streamed online. Names follow your chosen language</li>
     <li><b>NEW:</b> A "What's New" welcome the first time you open each new version</li>
     <li><b>NEW:</b> Available Everywhere - Astagfirullah is also on <b>Android</b>, <b>iOS</b>, and as <b>Chrome / Edge / Firefox extensions</b>. Find them all at <a href="https://astaghfirullah.4fdev.com/">astaghfirullah.4fdev.com</a> and <a href="https://afapps.4fdev.com/">afapps.4fdev.com</a></li>
     <li><b>NEW:</b> Daily dhikr window when you open your IDE - a random remembrance phrase that closes itself after 5 seconds, shown at most once a day and never blocking your work</li>
@@ -225,6 +234,9 @@ spiritual reflection with supplications, glorification, and blessings upon the P
         <!-- Application-level service for update notifications -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.UpdateNotificationService"/>
 
+        <!-- Application-level Quran audio player (one shared player across projects) -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.quran.QuranAudioPlayer"/>
+
         <!-- Application-level service for authentication caching -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.AuthCacheService"/>
 
@@ -249,6 +261,13 @@ spiritual reflection with supplications, glorification, and blessings upon the P
                     secondary="true"
                     icon="/icons/pluginIconSmall.svg"
                     factoryClass="com.alfayedoficial.astagfirullah.AstagfirullahToolWindowFactory"/>
+
+        <!-- Tool Window hosting the Quran audio player -->
+        <toolWindow id="Quran"
+                    anchor="right"
+                    secondary="true"
+                    icon="/icons/pluginIconSmall.svg"
+                    factoryClass="com.alfayedoficial.astagfirullah.QuranToolWindowFactory"/>
 
         <!-- Settings page accessible from Settings → Tools → Astagfirullah -->
         <applicationConfigurable
