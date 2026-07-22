@@ -82,9 +82,19 @@ jobs:
           - IC-2024.3.5
           - IC-2025.1
           - IC-2025.2
-          - IC-2025.3
-          - IC-2026.1
-          - IC-2026.2 # untilBuild ceiling (262)
+          - IC-2025.3 # highest version the 1.x toolchain can resolve
+          # IC-2026.1 and IC-2026.2 are INTENTIONALLY ABSENT, and this is a tooling
+          # limit, not a gap in the plugin.
+          # Both releases exist (jetbrains.com/idea/whatsnew shows 2026.2 as current,
+          # with 2026.1 listed as a previous release), but the deprecated Gradle
+          # IntelliJ Plugin 1.x resolves verifier IDEs through
+          # data.services.jetbrains.com, whose IIC product feed still tops out at
+          # 2025.3 / 253.28294.334. The Verifier therefore fails with
+          # "IDE 'IC-2026.2' cannot be downloaded" before it inspects anything.
+          # Verifying 261 and 262 is the acceptance criterion for migrating to the
+          # IntelliJ Platform Gradle Plugin 2.x, which resolves IDEs differently.
+          # Until then untilBuild=262.* is a forward-looking declaration, proven only
+          # up to 253.
     steps:
       - uses: actions/checkout@v4
 
