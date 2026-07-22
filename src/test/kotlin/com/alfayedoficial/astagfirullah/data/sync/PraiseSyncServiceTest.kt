@@ -486,7 +486,7 @@ class PraiseSyncServiceTest {
             syncService.syncIfNeeded()
 
             // Then
-            assertNotNull(capturedUpdateInfo)
+            org.junit.jupiter.api.Assertions.assertNotNull(capturedUpdateInfo)
             assertEquals(Constants.PLUGIN_VERSION, capturedUpdateInfo!!.currentVersion)
             assertEquals("2.1.0", capturedUpdateInfo!!.newVersion)
             assertEquals("NORMAL", capturedUpdateInfo!!.updateType)
@@ -524,7 +524,7 @@ class PraiseSyncServiceTest {
             syncService.syncIfNeeded()
 
             // Then: Emergency updates should NOT mark notification as shown
-            assertNotNull(capturedUpdateInfo)
+            org.junit.jupiter.api.Assertions.assertNotNull(capturedUpdateInfo)
             assertEquals("EMERGENCY", capturedUpdateInfo!!.updateType)
             verify(mockUpdateCacheService, never()).markNotificationShown()
         }

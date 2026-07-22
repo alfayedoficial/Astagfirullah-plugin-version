@@ -5,6 +5,31 @@ All notable changes to the Astagfirullah plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-07-22
+
+### Added
+- Daily dhikr window on IDE startup — a random remembrance phrase with a countdown, closing itself after 5 seconds. Shown at most once per calendar day, non-modal, and right-to-left for Arabic, Urdu and Farsi
+- Setting to turn the daily dhikr window off (Settings → Tools → Astagfirullah → Behavior)
+- Continuous integration: build, unit tests, and the JetBrains Plugin Verifier run on every push and pull request — the repository previously had none
+
+### Changed
+- **Supported IDE range is now 2024.2 through 2026.2** (build 242–262.*). Support for 2026.1 and 2026.2 is verified by the Plugin Verifier, not merely declared
+- **Minimum supported IDE raised from 2023.2 to 2024.2.** IntelliJ Platform 2024.2+ requires Java 21, and Java 21 bytecode cannot load on older IDEs. Users on 2023.2–2024.1 remain on 2.0.1
+- Migrated from the deprecated Gradle IntelliJ Plugin 1.x to IntelliJ Platform Gradle Plugin 2.x (Gradle 9, Kotlin 2.4, Java 21)
+- The plugin version now has a single source of truth (`project.version`); it previously lived in three files and had drifted
+
+### Removed
+- Firebase anonymous sign-in. It was used only to obtain a random identifier that was passed to the backend as an opaque `social_id` — no Firebase token was ever sent, so nothing about it was ever verified. A locally generated UUID provides the same guarantee without a network round-trip or a bundled Google API key. Anonymous registration is unchanged from the user's point of view
+
+### Fixed
+- The plugin could not be installed on IntelliJ 2026.1 or 2026.2 at all, because it declared compatibility only up to 2025.3
+- A stale hardcoded version could make the plugin prompt users to "update" to the build they were already running
+- Removed a Google API key that was committed to the public repository
+
+### Security
+- Removed a committed OpenSSH private key and a JetBrains Marketplace publish token from the working tree; both have been revoked/rotated
+- Enabled GitHub secret scanning on the repository
+
 ## [2.0.0] - 2026-01-18
 
 ### Added

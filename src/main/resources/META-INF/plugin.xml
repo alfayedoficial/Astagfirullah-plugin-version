@@ -30,6 +30,14 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     <li>Dynamic phrases synced from server with offline support</li>
 </ul>
 
+<p><b>Daily Remembrance</b></p>
+<ul>
+    <li>A gentle dhikr window when you open your IDE, once a day</li>
+    <li>Closes itself after 5 seconds with a visible countdown - never blocks your work</li>
+    <li>Right-to-left rendering for Arabic, Urdu and Farsi</li>
+    <li>Turn it off any time in Settings &rarr; Tools &rarr; Astagfirullah</li>
+</ul>
+
 <p><b>Smart Integration</b></p>
 <ul>
     <li>Automatically displays during Gradle builds and project sync</li>
@@ -87,7 +95,19 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     ]]></description>
 
     <change-notes><![CDATA[
-<h3>Version 2.0.1 - Authentication & Leaderboard</h3>
+<h3>Version 2.1.0 - Daily Dhikr &amp; IntelliJ 2026.2 Support</h3>
+<p><i>Now runs on the latest IDEs, with a daily moment of remembrance</i></p>
+<ul>
+    <li><b>NEW:</b> Daily dhikr window on IDE startup - a random remembrance phrase with a countdown that closes itself after 5 seconds. Shown at most once a day, never blocks your editor</li>
+    <li><b>NEW:</b> Turn the daily window off any time in Settings &rarr; Tools &rarr; Astagfirullah &rarr; Behavior</li>
+    <li><b>NEW:</b> Right-to-left rendering for Arabic, Urdu and Farsi in the daily window</li>
+    <li><b>FIXED:</b> The plugin could not be installed on IntelliJ 2026.1 or 2026.2 at all. It now supports up to 2026.2, verified against every release in the range</li>
+    <li><b>FIXED:</b> A stale internal version could prompt you to "update" to the build you were already running</li>
+    <li><b>IMPROVED:</b> Removed the Firebase dependency from anonymous sign-in. Fewer network calls, same behaviour</li>
+    <li><b>IMPORTANT:</b> Minimum supported IDE is now <b>2024.2</b>. IntelliJ 2024.2+ requires Java 21, which cannot run on older IDEs. If you are on 2023.2-2024.1, stay on version 2.0.1</li>
+</ul>
+
+<h3>Version 2.0.1 - Authentication &amp; Leaderboard</h3>
 <p><i>User accounts and global rankings</i></p>
 <ul>
     <li><b>NEW:</b> User Authentication - Login and Register with email</li>
@@ -228,6 +248,6 @@ spiritual reflection with supplications, glorification, and blessings upon the P
 
     <!-- Authoritative values are stamped by Gradle `patchPluginXml`; kept in sync here
          so a reader of this file is not misled. 262 = IntelliJ 2026.2. -->
-    <idea-version since-build="232" until-build="262.*"/>
+    <idea-version since-build="242" until-build="262.*"/>
 
 </idea-plugin>

@@ -62,3 +62,6 @@ local.properties
 # Publish/sign credentials are supplied via environment variables
 # (see `publishPlugin`/`signPlugin` in build.gradle.kts), never via a tracked file.
 **/gradle.properties.local
+### IntelliJ Platform Gradle Plugin 2.x scratch dirs ###
+.intellijPlatform/
+.kotlin/

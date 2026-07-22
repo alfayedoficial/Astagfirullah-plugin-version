@@ -99,8 +99,14 @@ class DailyDhikrDialog(
         return root
     }
 
-    /** Only a close action: there is nothing to confirm or cancel. */
-    override fun createActions(): Array<javax.swing.Action> = arrayOf(cancelAction)
+    /**
+     * A single dismiss button, relabelled from the inherited "Cancel".
+     *
+     * There is nothing to cancel here — the dialog only shows a phrase and closes itself —
+     * and "Cancel" would imply the user is rejecting something.
+     */
+    override fun createActions(): Array<javax.swing.Action> =
+        arrayOf(cancelAction.apply { putValue(javax.swing.Action.NAME, "Close") })
 
     private fun startCountdown() {
         val timer = Timer(Constants.DAILY_DHIKR_TICK_MS) {
