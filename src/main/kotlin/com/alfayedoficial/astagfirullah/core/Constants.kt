@@ -1,5 +1,8 @@
 package com.alfayedoficial.astagfirullah.core
 
+import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.openapi.extensions.PluginId
+
 /**
  * Central location for all plugin constants.
  * Eliminates magic strings and numbers throughout the codebase.
@@ -8,8 +11,30 @@ object Constants {
 
     // Plugin Information
     const val PLUGIN_ID = "com.alfayedoficial.astagfirullah"
-    const val PLUGIN_VERSION = "2.0.1"
     const val PLUGIN_NAME = "Astagfirullah"
+
+    /**
+     * Fallback used only when the plugin descriptor is unavailable (e.g. plain unit tests
+     * with no running IntelliJ Platform). Never read this directly — use [PLUGIN_VERSION].
+     */
+    private const val FALLBACK_VERSION = "2.0.1"
+
+    /**
+     * The running plugin's version, read from the plugin descriptor that Gradle's
+     * `patchPluginXml` stamps from `project.version`.
+     *
+     * This used to be a hardcoded constant, which made the version live in THREE places
+     * (build.gradle.kts, plugin.xml, here) and silently drift. That drift is not cosmetic:
+     * [com.alfayedoficial.astagfirullah.data.api.SettingsApiService.isUpdateAvailable]
+     * compares this value against the server's latest version, so a stale constant makes
+     * the plugin nag every user to "update" to a build they are already running.
+     */
+    @JvmStatic
+    val PLUGIN_VERSION: String by lazy {
+        runCatching {
+            PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID))?.version
+        }.getOrNull()?.takeIf { it.isNotBlank() } ?: FALLBACK_VERSION
+    }
 
     // API Configuration
     const val API_BASE_URL = "https://astaghfirullah.4fdev.com/api/v2"

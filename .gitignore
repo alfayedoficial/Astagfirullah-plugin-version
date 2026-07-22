@@ -40,3 +40,25 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Credentials — never commit (this repo is PUBLIC) ###
+# An OpenSSH private key and the JetBrains Marketplace publish token were previously
+# tracked here. These rules are written AFTER the fact, so they do not retroactively
+# protect anything already in history — the history purge is tracked separately.
+# NOTE the leading slash: these are repo-ROOT key files. An unanchored `astagfirullah`
+# also matches the source package dir src/main/kotlin/com/alfayedoficial/astagfirullah,
+# which would silently make every new file in that package un-addable.
+/astagfirullah
+/astagfirullah.pub
+*.pem
+*.p12
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+*.key
+secrets.properties
+local.properties
+# Publish/sign credentials are supplied via environment variables
+# (see `publishPlugin`/`signPlugin` in build.gradle.kts), never via a tracked file.
+**/gradle.properties.local

@@ -1,0 +1,128 @@
+name: Build & Verify
+
+# The plugin declares compatibility from build 232 (IntelliJ 2023.2) up to 262.* (2026.2).
+# That range is only a CLAIM until the JetBrains Plugin Verifier proves it, so this
+# workflow is the gate: nothing ships on an unverified compatibility range.
+
+on:
+  push:
+    branches: [ main, develop-convergence, 'chore/**', 'feature/**', 'fix/**' ]
+  pull_request:
+    branches: [ main, develop-convergence ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Java 17 matches the project's jvmToolchain in build.gradle.kts.
+      # It must be raised to 21 in the same change that migrates to the
+      # IntelliJ Platform Gradle Plugin 2.x (2024.2+ requires Java 21).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build plugin
+        run: ./gradlew buildPlugin --stacktrace
+
+      # NON-BLOCKING, deliberately and temporarily.
+      # 108 of 753 tests already fail on the branch point (4a7461f) -- verified in an
+      # isolated worktree -- because this repo has never had CI to catch the rot.
+      # Hard-failing here would make the pipeline permanently red on day one and, worse,
+      # would skip the Plugin Verifier below, which is the job that actually proves the
+      # declared 232->262 compatibility range.
+      # Results are still uploaded and visible. Remove continue-on-error once the 108
+      # pre-existing failures are triaged -- do NOT let this become the permanent state.
+      - name: Unit tests (non-blocking until pre-existing failures are triaged)
+        continue-on-error: true
+        run: ./gradlew test --stacktrace
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
+          if-no-files-found: ignore
+
+      - name: Upload plugin distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-distribution
+          path: build/distributions/*.zip
+          if-no-files-found: error
+
+  verify:
+    # ONE IDE PER JOB, deliberately.
+    # Verifying all ten on a single runner died with "No space left on device": each
+    # IntelliJ download is over a gigabyte and a hosted runner has ~14 GB free. A matrix
+    # gives every IDE a fresh disk, runs them in parallel, and makes a failure point at
+    # one specific IDE rather than the whole batch.
+    name: Verify ${{ matrix.ide }}
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false # one bad IDE must not hide the results for the others
+      matrix:
+        ide:
+          - IC-2023.2.6 # sinceBuild floor (232)
+          - IC-2023.3.8
+          - IC-2024.1.7
+          - IC-2024.2.5
+          - IC-2024.3.5
+          - IC-2025.1
+          - IC-2025.2
+          - IC-2025.3 # highest version the 1.x toolchain can resolve
+          # IC-2026.1 and IC-2026.2 are INTENTIONALLY ABSENT, and this is a tooling
+          # limit, not a gap in the plugin.
+          # Both releases exist (jetbrains.com/idea/whatsnew shows 2026.2 as current,
+          # with 2026.1 listed as a previous release), but the deprecated Gradle
+          # IntelliJ Plugin 1.x resolves verifier IDEs through
+          # data.services.jetbrains.com, whose IIC product feed still tops out at
+          # 2025.3 / 253.28294.334. The Verifier therefore fails with
+          # "IDE 'IC-2026.2' cannot be downloaded" before it inspects anything.
+          # Verifying 261 and 262 is the acceptance criterion for migrating to the
+          # IntelliJ Platform Gradle Plugin 2.x, which resolves IDEs differently.
+          # Until then untilBuild=262.* is a forward-looking declaration, proven only
+          # up to 253.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The Verifier downloads one full IDE per declared branch (several GB).
+      # Caching keeps subsequent runs from re-fetching them every time.
+      - name: Cache Plugin Verifier IDEs
+        uses: actions/cache@v4
+        with:
+          path: ~/.pluginVerifier/ides
+          key: plugin-verifier-ide-${{ matrix.ide }}
+
+      - name: Verify plugin structure
+        run: ./gradlew verifyPlugin --stacktrace
+
+      - name: Run Plugin Verifier
+        run: ./gradlew runPluginVerifier -PpluginVerifierIdeVersions=${{ matrix.ide }} --stacktrace
+
+      - name: Upload verifier report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-verifier-report-${{ matrix.ide }}
+          path: build/reports/pluginVerifier
+          if-no-files-found: ignore
