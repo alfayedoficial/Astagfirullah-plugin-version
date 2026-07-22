@@ -83,6 +83,13 @@ object Constants {
     const val PHRASES_PER_DISPLAY = 6
     const val STARTUP_DISPLAY_SECONDS = 5
 
+    // Daily dhikr startup dialog
+    /** Seconds the dialog stays up before dismissing itself. */
+    const val DAILY_DHIKR_COUNTDOWN_SECONDS = 5
+    /** Countdown tick interval; 1s so the label counts down in whole seconds. */
+    const val DAILY_DHIKR_TICK_MS = 1000
+    const val DEFAULT_DAILY_DHIKR_ENABLED = true
+
     // Rating Prompt Timing (in milliseconds)
     const val FIRST_RATING_DELAY_MS = 2 * 60 * 1000L          // 2 minutes
     const val SECOND_RATING_DELAY_MS = 2 * 24 * 60 * 60 * 1000L // 2 days

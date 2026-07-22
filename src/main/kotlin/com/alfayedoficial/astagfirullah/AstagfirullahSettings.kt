@@ -59,7 +59,15 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
         var firstRatingTime: String = Constants.RATING_STATE_FIRST,
         var ratingPrompted: Boolean = false,
         var firstSetupCompleted: Boolean = false,
-        var lastRatingPromptTime: Long = 0L
+        var lastRatingPromptTime: Long = 0L,
+        /** Whether the once-a-day dhikr dialog is shown when the IDE opens. */
+        var dailyDhikrEnabled: Boolean = Constants.DEFAULT_DAILY_DHIKR_ENABLED,
+        /**
+         * ISO date (yyyy-MM-dd) the daily dhikr dialog last appeared, used to cap it at
+         * once per day. Stored as a string rather than an epoch so the comparison is a
+         * plain calendar-day check and cannot drift with timezone maths.
+         */
+        var lastDailyDhikrDate: String = ""
     )
 
     override fun getState(): State = myState
@@ -105,6 +113,24 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
     var lastRatingPromptTime: Long
         get() = myState.lastRatingPromptTime
         set(value) { myState.lastRatingPromptTime = value }
+
+    var dailyDhikrEnabled: Boolean
+        get() = myState.dailyDhikrEnabled
+        set(value) { myState.dailyDhikrEnabled = value }
+
+    var lastDailyDhikrDate: String
+        get() = myState.lastDailyDhikrDate
+        set(value) { myState.lastDailyDhikrDate = value }
+
+    /**
+     * Whether the daily dhikr dialog should be shown for [today].
+     *
+     * Caps the dialog at once per calendar day. IntelliJ fires a startup activity per
+     * OPENED PROJECT, so without this check a developer opening three projects in one
+     * morning would get three popups.
+     */
+    fun shouldShowDailyDhikr(today: String): Boolean =
+        dailyDhikrEnabled && lastDailyDhikrDate != today
 
     /**
      * Checks if this is the first run of the plugin.
