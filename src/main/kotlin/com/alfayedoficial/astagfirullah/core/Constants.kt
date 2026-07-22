@@ -1,7 +1,6 @@
 package com.alfayedoficial.astagfirullah.core
 
-import com.intellij.ide.plugins.PluginManagerCore
-import com.intellij.openapi.extensions.PluginId
+import java.util.Properties
 
 /**
  * Central location for all plugin constants.
@@ -17,7 +16,7 @@ object Constants {
      * Fallback used only when the plugin descriptor is unavailable (e.g. plain unit tests
      * with no running IntelliJ Platform). Never read this directly — use [PLUGIN_VERSION].
      */
-    private const val FALLBACK_VERSION = "2.0.1"
+    private const val FALLBACK_VERSION = "2.1.0"
 
     /**
      * The running plugin's version, read from the plugin descriptor that Gradle's
@@ -31,10 +30,22 @@ object Constants {
      */
     @JvmStatic
     val PLUGIN_VERSION: String by lazy {
+        // Read from a resource that Gradle stamps from `project.version`, so the version
+        // has exactly one source of truth and this code calls no IntelliJ API.
+        //
+        // Every platform API for reading your own descriptor -- PluginManagerCore.getPlugin,
+        // PluginManager.getPluginByClass, PluginManager.getPlugin -- is @ApiStatus.Internal
+        // or deprecated on 2026.2, and the Plugin Verifier fails the build on
+        // INTERNAL_API_USAGES. A generated resource sidesteps that entirely and also works
+        // in plain unit tests, where no IntelliJ Application exists.
         runCatching {
-            PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID))?.version
+            Constants::class.java.getResourceAsStream(VERSION_RESOURCE)?.use { stream ->
+                Properties().apply { load(stream) }.getProperty("version")
+            }
         }.getOrNull()?.takeIf { it.isNotBlank() } ?: FALLBACK_VERSION
     }
+
+    private const val VERSION_RESOURCE = "/astagfirullah-version.properties"
 
     // API Configuration
     const val API_BASE_URL = "https://astaghfirullah.4fdev.com/api/v2"

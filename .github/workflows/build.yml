@@ -1,6 +1,6 @@
 name: Build & Verify
 
-# The plugin declares compatibility from build 232 (IntelliJ 2023.2) up to 262.* (2026.2).
+# The plugin declares compatibility from build 242 (IntelliJ 2024.2) up to 262.* (2026.2).
 # That range is only a CLAIM until the JetBrains Plugin Verifier proves it, so this
 # workflow is the gate: nothing ships on an unverified compatibility range.
 
@@ -27,13 +27,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Java 17 matches the project's jvmToolchain in build.gradle.kts.
-      # It must be raised to 21 in the same change that migrates to the
-      # IntelliJ Platform Gradle Plugin 2.x (2024.2+ requires Java 21).
+      # Java 21: IntelliJ Platform 2024.2+ requires it, and the project's jvmToolchain
+      # is set to 21 since the IntelliJ Platform Gradle Plugin 2.x migration.
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - uses: gradle/actions/setup-gradle@v4
 
@@ -80,33 +79,20 @@ jobs:
       fail-fast: false # one bad IDE must not hide the results for the others
       matrix:
         ide:
-          - IC-2023.2.6 # sinceBuild floor (232)
-          - IC-2023.3.8
-          - IC-2024.1.7
-          - IC-2024.2.5
-          - IC-2024.3.5
-          - IC-2025.1
-          - IC-2025.2
-          - IC-2025.3 # highest version the 1.x toolchain can resolve
-          # IC-2026.1 and IC-2026.2 are INTENTIONALLY ABSENT, and this is a tooling
-          # limit, not a gap in the plugin.
-          # Both releases exist (jetbrains.com/idea/whatsnew shows 2026.2 as current,
-          # with 2026.1 listed as a previous release), but the deprecated Gradle
-          # IntelliJ Plugin 1.x resolves verifier IDEs through
-          # data.services.jetbrains.com, whose IIC product feed still tops out at
-          # 2025.3 / 253.28294.334. The Verifier therefore fails with
-          # "IDE 'IC-2026.2' cannot be downloaded" before it inspects anything.
-          # Verifying 261 and 262 is the acceptance criterion for migrating to the
-          # IntelliJ Platform Gradle Plugin 2.x, which resolves IDEs differently.
-          # Until then untilBuild=262.* is a forward-looking declaration, proven only
-          # up to 253.
+          - '2024.2.5' # sinceBuild floor (242)
+          - '2024.3.5'
+          - '2025.1'
+          - '2025.2'
+          - '2025.3'
+          - '2026.1'
+          - '2026.2' # untilBuild ceiling (262)
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - uses: gradle/actions/setup-gradle@v4
 
@@ -118,11 +104,13 @@ jobs:
           path: ~/.pluginVerifier/ides
           key: plugin-verifier-ide-${{ matrix.ide }}
 
-      - name: Verify plugin structure
-        run: ./gradlew verifyPlugin --stacktrace
+      # 2.x task names: verifyPluginProjectConfiguration checks the setup,
+      # verifyPlugin IS the JetBrains Plugin Verifier (1.x called it runPluginVerifier).
+      - name: Verify plugin project configuration
+        run: ./gradlew verifyPluginProjectConfiguration --stacktrace
 
       - name: Run Plugin Verifier
-        run: ./gradlew runPluginVerifier -PpluginVerifierIdeVersions=${{ matrix.ide }} --stacktrace
+        run: ./gradlew verifyPlugin -PpluginVerifierIdeVersions=${{ matrix.ide }} --stacktrace
 
       - name: Upload verifier report
         if: always()
