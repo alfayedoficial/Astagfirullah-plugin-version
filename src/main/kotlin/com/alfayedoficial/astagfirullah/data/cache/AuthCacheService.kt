@@ -44,7 +44,7 @@ class AuthCacheService : PersistentStateComponent<AuthCacheService.AuthState> {
         var userAvatarUrl: String = "",
         var rememberMe: Boolean = false,
         var lastLoginTime: Long = 0L,
-        var socialId: String = "" // Firebase Anonymous UID
+        var socialId: String = "" // Locally generated anonymous identifier
     )
 
     override fun getState(): AuthState = myState
@@ -200,7 +200,7 @@ class AuthCacheService : PersistentStateComponent<AuthCacheService.AuthState> {
     }
 
     /**
-     * Saves the Firebase social ID (anonymous UID).
+     * Saves the anonymous social ID.
      */
     fun saveSocialId(socialId: String) {
         myState.socialId = socialId
@@ -208,12 +208,12 @@ class AuthCacheService : PersistentStateComponent<AuthCacheService.AuthState> {
     }
 
     /**
-     * Gets the stored Firebase social ID.
+     * Gets the stored anonymous social ID.
      */
     fun getSocialId(): String? = myState.socialId.takeIf { it.isNotEmpty() }
 
     /**
-     * Checks if user registered via Firebase Anonymous auth.
+     * Checks if user registered via anonymous auth.
      */
     fun isSocialLogin(): Boolean = myState.socialId.isNotEmpty()
 }

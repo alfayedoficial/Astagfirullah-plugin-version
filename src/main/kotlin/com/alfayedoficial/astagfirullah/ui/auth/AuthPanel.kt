@@ -193,7 +193,7 @@ class AuthPanel : JPanel(BorderLayout()) {
     }
 
     /**
-     * Performs quick registration with Firebase Anonymous (name only).
+     * Performs quick anonymous registration (name only).
      */
     private fun performQuickRegister(name: String) {
         registerPanel.setLoading(true)
@@ -201,7 +201,7 @@ class AuthPanel : JPanel(BorderLayout()) {
         showLoadingOverlay("Setting up your account...")
 
         ApplicationManager.getApplication().executeOnPooledThread {
-            val result = AuthSyncService.getInstance().registerWithFirebase(name)
+            val result = AuthSyncService.getInstance().registerAnonymously(name)
 
             SwingUtilities.invokeLater {
                 hideLoadingOverlay()

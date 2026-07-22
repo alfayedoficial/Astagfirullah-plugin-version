@@ -52,10 +52,6 @@ object Constants {
     const val API_AUTH_LOGOUT_ENDPOINT = "/auth/logout"
     const val API_AUTH_DELETE_ACCOUNT_ENDPOINT = "/auth/deleteAccount"
 
-    // Firebase Configuration (for anonymous auth)
-    const val FIREBASE_API_KEY = "AIzaSyDPGs_6FVQUpA0_cfgQ3qvpXOWMOLgAt5g" // Replace with actual key
-    const val FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
-
     // Leaderboard API Endpoints (uses v1)
     const val API_LEADERBOARD_ENDPOINT = "/statistic/top-users"
     const val API_STATISTIC_CREATE_ENDPOINT = "/statistic/create"
