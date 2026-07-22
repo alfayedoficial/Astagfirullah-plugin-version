@@ -63,6 +63,16 @@ spiritual reflection with supplications, glorification, and blessings upon the P
 
 <br/>
 
+<h3>Available Everywhere</h3>
+<p>Astagfirullah goes wherever you do. Keep your dhikr going beyond the IDE:</p>
+<ul>
+    <li><b>Android & iOS apps</b> - <a href="https://astaghfirullah.4fdev.com/">astaghfirullah.4fdev.com</a></li>
+    <li><b>Browser extensions</b> for Chrome, Edge and Firefox - <a href="https://astaghfirullah.4fdev.com/">astaghfirullah.4fdev.com</a></li>
+    <li><b>More apps from AFApps</b> - <a href="https://afapps.4fdev.com/">afapps.4fdev.com</a></li>
+</ul>
+
+<br/>
+
 <h3>Getting Started</h3>
 <ol>
     <li>Install the plugin and restart your IDE</li>
@@ -95,6 +105,20 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     ]]></description>
 
     <change-notes><![CDATA[
+<h3>Version 3.0.0 - Everywhere You Are</h3>
+<p><i>A major release: latest-IDE support, a daily moment of remembrance, and the whole Astagfirullah family in one place</i></p>
+<ul>
+    <li><b>NEW:</b> A "What's New" welcome the first time you open each new version</li>
+    <li><b>NEW:</b> Available Everywhere - Astagfirullah is also on <b>Android</b>, <b>iOS</b>, and as <b>Chrome / Edge / Firefox extensions</b>. Find them all at <a href="https://astaghfirullah.4fdev.com/">astaghfirullah.4fdev.com</a> and <a href="https://afapps.4fdev.com/">afapps.4fdev.com</a></li>
+    <li><b>NEW:</b> Daily dhikr window when you open your IDE - a random remembrance phrase that closes itself after 5 seconds, shown at most once a day and never blocking your work</li>
+    <li><b>NEW:</b> Right-to-left rendering for Arabic, Urdu and Farsi</li>
+    <li><b>FIXED:</b> The plugin could not be installed on IntelliJ 2026.1 or 2026.2 at all. It now supports up to <b>2026.2</b>, verified against every release in the range</li>
+    <li><b>FIXED:</b> A stale internal version could prompt you to "update" to the build you were already running</li>
+    <li><b>IMPROVED:</b> Lighter, faster sign-in - one less network round-trip</li>
+    <li><b>IMPROVED:</b> Modernised build with continuous integration and a verified compatibility range</li>
+    <li><b>IMPORTANT:</b> Minimum supported IDE is now <b>2024.2</b>. IntelliJ 2024.2+ requires Java 21, which cannot run on older IDEs. If you are on 2023.2-2024.1, stay on version 2.0.1</li>
+</ul>
+
 <h3>Version 2.1.0 - Daily Dhikr &amp; IntelliJ 2026.2 Support</h3>
 <p><i>Now runs on the latest IDEs, with a daily moment of remembrance</i></p>
 <ul>

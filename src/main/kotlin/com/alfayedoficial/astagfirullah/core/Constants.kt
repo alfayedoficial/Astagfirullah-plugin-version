@@ -16,7 +16,7 @@ object Constants {
      * Fallback used only when the plugin descriptor is unavailable (e.g. plain unit tests
      * with no running IntelliJ Platform). Never read this directly — use [PLUGIN_VERSION].
      */
-    private const val FALLBACK_VERSION = "2.1.0"
+    private const val FALLBACK_VERSION = "3.0.0"
 
     /**
      * The running plugin's version, read from the plugin descriptor that Gradle's
@@ -78,6 +78,12 @@ object Constants {
     const val PLUGIN_MARKETPLACE_URL = "https://plugins.jetbrains.com/plugin/24628-astagfirullah"
     const val DEVELOPER_LINKEDIN_URL = "https://www.linkedin.com/in/alfayedoficial"
     const val LINKEDIN_SHARE_BASE_URL = "https://www.linkedin.com/shareArticle?mini=true&url="
+
+    // Product / ecosystem websites. These are the developer's own sites and are the
+    // canonical hubs that link out to every platform build (mobile stores, extension
+    // stores). We link only these two owner-supplied URLs and never fabricate store links.
+    const val WEBSITE_ASTAGHFIRULLAH = "https://astaghfirullah.4fdev.com/"
+    const val WEBSITE_AFAPPS = "https://afapps.4fdev.com/"
 
     // Resources
     const val BLESSING_AUDIO_PATH = "/raw/mohmmed.wav"

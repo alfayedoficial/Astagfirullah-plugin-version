@@ -67,7 +67,13 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
          * once per day. Stored as a string rather than an epoch so the comparison is a
          * plain calendar-day check and cannot drift with timezone maths.
          */
-        var lastDailyDhikrDate: String = ""
+        var lastDailyDhikrDate: String = "",
+        /**
+         * The plugin version whose "What's New" screen the user has already seen. When it
+         * differs from the running version, the What's New dialog is shown once on the next
+         * IDE open. Empty means it has never been shown.
+         */
+        var lastWhatsNewVersion: String = ""
     )
 
     override fun getState(): State = myState
@@ -131,6 +137,21 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
      */
     fun shouldShowDailyDhikr(today: String): Boolean =
         dailyDhikrEnabled && lastDailyDhikrDate != today
+
+    var lastWhatsNewVersion: String
+        get() = myState.lastWhatsNewVersion
+        set(value) { myState.lastWhatsNewVersion = value }
+
+    /**
+     * Whether the "What's New" dialog should be shown for [currentVersion].
+     *
+     * True when the running version differs from the last version whose What's New the user
+     * saw. A fresh install is handled by the caller: [FirstRunSetupActivity] records the
+     * current version after the setup wizard so a new user never sees both the wizard and a
+     * What's New for the same version.
+     */
+    fun shouldShowWhatsNew(currentVersion: String): Boolean =
+        lastWhatsNewVersion != currentVersion
 
     /**
      * Checks if this is the first run of the plugin.

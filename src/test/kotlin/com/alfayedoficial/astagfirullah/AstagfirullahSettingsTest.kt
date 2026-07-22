@@ -629,4 +629,39 @@ class AstagfirullahSettingsTest {
             assertEquals("2026-07-22", restored.lastDailyDhikrDate)
         }
     }
+
+    @Nested
+    @DisplayName("What's New Tests")
+    inner class WhatsNewTests {
+
+        @Test
+        @DisplayName("Shows on a fresh install, when no version has been recorded")
+        fun showsWhenNeverShown() {
+            assertEquals("", settings.lastWhatsNewVersion)
+            assertTrue(settings.shouldShowWhatsNew("3.0.0"))
+        }
+
+        @Test
+        @DisplayName("Does not show again for the same version")
+        fun doesNotShowSameVersion() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            assertFalse(settings.shouldShowWhatsNew("3.0.0"))
+        }
+
+        @Test
+        @DisplayName("Shows again after an upgrade to a new version")
+        fun showsAfterUpgrade() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            assertTrue(settings.shouldShowWhatsNew("3.1.0"))
+        }
+
+        @Test
+        @DisplayName("lastWhatsNewVersion survives serialization round-trip")
+        fun survivesSerialization() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            val restored = AstagfirullahSettings()
+            XmlSerializerUtil.copyBean(settings.state, restored.state)
+            assertEquals("3.0.0", restored.lastWhatsNewVersion)
+        }
+    }
 }

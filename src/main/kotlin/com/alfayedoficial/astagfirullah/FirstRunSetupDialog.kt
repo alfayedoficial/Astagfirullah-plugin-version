@@ -69,7 +69,7 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
 
     override fun createCenterPanel(): JComponent {
         val mainPanel = JPanel(BorderLayout())
-        mainPanel.preferredSize = Dimension(550, 450)
+        mainPanel.preferredSize = Dimension(550, 520)
 
         // Create all step panels
         welcomePanel = createWelcomePanel()
@@ -345,8 +345,17 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
         blessingWrapper.add(blessingLabel)
         contentPanel.add(blessingWrapper)
 
+        contentPanel.add(Box.createVerticalStrut(20))
+
+        // Informational "also available on Android / iOS / browser extensions" banner.
+        // Cross-promotion of the developer's own apps via their own websites; see
+        // CrossPlatformBanner for the policy rationale.
+        val bannerWrapper = JPanel(FlowLayout(FlowLayout.CENTER))
+        bannerWrapper.add(com.alfayedoficial.astagfirullah.ui.components.CrossPlatformBanner.create())
+        contentPanel.add(bannerWrapper)
+
         panel.add(headerPanel, BorderLayout.NORTH)
-        panel.add(contentPanel, BorderLayout.CENTER)
+        panel.add(JBScrollPane(contentPanel).apply { border = JBUI.Borders.empty() }, BorderLayout.CENTER)
 
         return panel
     }
