@@ -573,4 +573,60 @@ class AstagfirullahSettingsTest {
             assertEquals(222222L, settings.lastRatingPromptTime)
         }
     }
+
+    @Nested
+    @DisplayName("Daily Dhikr Dialog Tests")
+    inner class DailyDhikrTests {
+
+        @Test
+        @DisplayName("Daily dhikr is enabled by default")
+        fun enabledByDefault() {
+            assertTrue(settings.dailyDhikrEnabled)
+            assertEquals(Constants.DEFAULT_DAILY_DHIKR_ENABLED, settings.dailyDhikrEnabled)
+        }
+
+        @Test
+        @DisplayName("Shows on a fresh install, when no date has been recorded")
+        fun showsWhenNeverShown() {
+            assertEquals("", settings.lastDailyDhikrDate)
+            assertTrue(settings.shouldShowDailyDhikr("2026-07-22"))
+        }
+
+        @Test
+        @DisplayName("Does not show twice on the same day")
+        fun doesNotShowTwiceSameDay() {
+            settings.lastDailyDhikrDate = "2026-07-22"
+            assertFalse(settings.shouldShowDailyDhikr("2026-07-22"))
+        }
+
+        @Test
+        @DisplayName("Shows again the next day")
+        fun showsAgainNextDay() {
+            settings.lastDailyDhikrDate = "2026-07-22"
+            assertTrue(settings.shouldShowDailyDhikr("2026-07-23"))
+        }
+
+        @Test
+        @DisplayName("Never shows when the user disabled it, even on a new day")
+        fun neverShowsWhenDisabled() {
+            settings.dailyDhikrEnabled = false
+            settings.lastDailyDhikrDate = "2026-07-22"
+            assertFalse(settings.shouldShowDailyDhikr("2026-07-23"))
+            settings.lastDailyDhikrDate = ""
+            assertFalse(settings.shouldShowDailyDhikr("2026-07-23"))
+        }
+
+        @Test
+        @DisplayName("Daily dhikr fields survive serialization round-trip")
+        fun survivesSerialization() {
+            settings.dailyDhikrEnabled = false
+            settings.lastDailyDhikrDate = "2026-07-22"
+
+            val restored = AstagfirullahSettings()
+            XmlSerializerUtil.copyBean(settings.state, restored.state)
+
+            assertFalse(restored.dailyDhikrEnabled)
+            assertEquals("2026-07-22", restored.lastDailyDhikrDate)
+        }
+    }
 }

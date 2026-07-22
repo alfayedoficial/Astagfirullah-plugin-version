@@ -160,6 +160,9 @@ spiritual reflection with supplications, glorification, and blessings upon the P
         <postStartupActivity implementation="com.alfayedoficial.astagfirullah.AppProjectActivity"/>
         <postStartupActivity implementation="com.alfayedoficial.astagfirullah.RatePromptActivity"/>
 
+        <!-- Once-a-day dhikr dialog on IDE open (non-modal, self-dismissing) -->
+        <postStartupActivity implementation="com.alfayedoficial.astagfirullah.DailyDhikrActivity"/>
+
         <!-- Application-level service for settings persistence -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.AstagfirullahSettings"/>
 

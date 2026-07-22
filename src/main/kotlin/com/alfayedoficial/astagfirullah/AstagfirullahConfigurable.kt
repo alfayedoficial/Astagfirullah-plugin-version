@@ -50,6 +50,7 @@ class AstagfirullahConfigurable : Configurable {
     private lateinit var delayComboBox: ComboBox<String>
     private lateinit var soundCheckBox: JCheckBox
     private lateinit var startupCheckBox: JCheckBox
+    private lateinit var dailyDhikrCheckBox: JCheckBox
 
     override fun getDisplayName(): String = Constants.PLUGIN_NAME
 
@@ -181,6 +182,13 @@ class AstagfirullahConfigurable : Configurable {
         gbc.gridy = row++
         startupCheckBox = JCheckBox("Show phrases on IDE startup", settings.showOnStartup)
         panel.add(startupCheckBox, gbc)
+
+        gbc.gridy = row++
+        dailyDhikrCheckBox = JCheckBox(
+            "Show a daily dhikr window when the IDE opens (once a day, closes itself)",
+            settings.dailyDhikrEnabled,
+        )
+        panel.add(dailyDhikrCheckBox, gbc)
 
         // Info panel
         gbc.gridy = row++
@@ -763,7 +771,8 @@ class AstagfirullahConfigurable : Configurable {
         return languageComboBox.selectedItem != settings.language ||
                 delayComboBox.selectedItem != settings.delaySeconds ||
                 soundCheckBox.isSelected != settings.soundEnabled ||
-                startupCheckBox.isSelected != settings.showOnStartup
+                startupCheckBox.isSelected != settings.showOnStartup ||
+                dailyDhikrCheckBox.isSelected != settings.dailyDhikrEnabled
     }
 
     override fun apply() {
@@ -771,6 +780,7 @@ class AstagfirullahConfigurable : Configurable {
         settings.delaySeconds = delayComboBox.selectedItem as String
         settings.soundEnabled = soundCheckBox.isSelected
         settings.showOnStartup = startupCheckBox.isSelected
+        settings.dailyDhikrEnabled = dailyDhikrCheckBox.isSelected
     }
 
     override fun reset() {
@@ -778,5 +788,6 @@ class AstagfirullahConfigurable : Configurable {
         delayComboBox.selectedItem = settings.delaySeconds
         soundCheckBox.isSelected = settings.soundEnabled
         startupCheckBox.isSelected = settings.showOnStartup
+        dailyDhikrCheckBox.isSelected = settings.dailyDhikrEnabled
     }
 }
