@@ -50,8 +50,37 @@ tasks {
    }
 
    patchPluginXml {
-      sinceBuild.set("231")
-      untilBuild.set("253.*")
+      // Single source of truth for the version: `project.version` above.
+      // plugin.xml no longer hardcodes <version>, so the two can't drift.
+      version.set(project.version.toString())
+      // Was "231", but the plugin is built against IntelliJ 2023.2 (branch 232), so
+      // `verifyPluginConfiguration` flagged it: 231 < 232. Advertising 2023.1 support we
+      // never compiled against is a false compatibility claim, so the floor now matches
+      // the platform we actually build on.
+      sinceBuild.set("232")
+      // 2026.2 => branch 262. Branch number = last two digits of the year + release number.
+      // Do NOT omit untilBuild: an absent value opts the plugin into every future,
+      // unreleased build and into new IDEs we have never verified against.
+      untilBuild.set("262.*")
+   }
+
+   // The compatibility range declared above is only a CLAIM until the Plugin Verifier
+   // proves it. One IDE per declared branch, so a removed API is caught before release.
+   runPluginVerifier {
+      ideVersions.set(
+         listOf(
+            "IC-2023.2.6", // sinceBuild floor (232)
+            "IC-2023.3.8",
+            "IC-2024.1.7",
+            "IC-2024.2.5",
+            "IC-2024.3.5",
+            "IC-2025.1",
+            "IC-2025.2",
+            "IC-2025.3",
+            "IC-2026.1",
+            "IC-2026.2", // untilBuild ceiling (262)
+         )
+      )
    }
 
    signPlugin {

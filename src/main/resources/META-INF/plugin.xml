@@ -6,7 +6,8 @@
 
     <vendor email="alialfayed.official@gmail.com" url="https://www.linkedin.com/in/alfayedoficial">Ali Al-Shahat Ali</vendor>
 
-    <version>2.0.1</version>
+    <!-- Version is injected by the Gradle `patchPluginXml` task from `project.version`.
+         Do not hardcode it here: it drifted from build.gradle.kts before. -->
 
     <category>Education</category>
 
@@ -222,6 +223,8 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     </actions>
 
 
-    <idea-version since-build="231" until-build="253.*"/>
+    <!-- Authoritative values are stamped by Gradle `patchPluginXml`; kept in sync here
+         so a reader of this file is not misled. 262 = IntelliJ 2026.2. -->
+    <idea-version since-build="232" until-build="262.*"/>
 
 </idea-plugin>

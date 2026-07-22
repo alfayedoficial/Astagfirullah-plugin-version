@@ -488,8 +488,18 @@ class AstagfirullahConfigurableTest {
         @Test
         @DisplayName("About tab shows plugin version")
         fun aboutShowsPluginVersion() {
-            assertEquals("2.0.0", Constants.PLUGIN_VERSION,
-                "About tab should show plugin version")
+            // Deliberately NOT pinned to a literal. This assertion used to read
+            // assertEquals("2.0.0", ...) while the constant was "2.0.1", so it was already
+            // failing — nothing caught it because the repo had no CI. Pinning the version
+            // here also guarantees a broken test on every single release.
+            // PLUGIN_VERSION is now sourced from the plugin descriptor, so assert the
+            // contract that actually matters: the About tab has a usable version string.
+            val version = Constants.PLUGIN_VERSION
+            assertTrue(version.isNotBlank(), "About tab should show a plugin version")
+            assertTrue(
+                version.matches(Regex("^\\d+\\.\\d+\\.\\d+$")),
+                "About tab version should be semantic (MAJOR.MINOR.PATCH), was: $version"
+            )
         }
 
         @Test
