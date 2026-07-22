@@ -13,7 +13,12 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Cancel superseded runs on feature/PR branches, but NEVER on the integration
+  # branches. Every merge into develop-convergence/main must produce a verdict:
+  # previously each merge cancelled the one before it, so three merges in a row all
+  # ended "cancelled" and the merged code went unverified until dispatched by hand.
+  cancel-in-progress: >-
+    ${{ github.ref != 'refs/heads/develop-convergence' && github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
