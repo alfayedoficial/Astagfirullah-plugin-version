@@ -2,7 +2,7 @@ package com.alfayedoficial.astagfirullah.data.sync
 
 import com.alfayedoficial.astagfirullah.core.Constants
 import com.alfayedoficial.astagfirullah.data.api.AuthApiService
-import com.alfayedoficial.astagfirullah.data.api.FirebaseAuthService
+import java.util.UUID
 import com.alfayedoficial.astagfirullah.data.cache.AuthCacheService
 import com.alfayedoficial.astagfirullah.data.model.*
 import com.intellij.openapi.application.ApplicationManager
@@ -175,13 +175,14 @@ class AuthSyncService {
     }
 
     /**
-     * Registers a new user using Firebase Anonymous authentication.
-     * Flow: Firebase Anonymous Auth → Get UID → Register with social_id
+     * Registers a new user with only a display name, using a locally generated
+     * anonymous identifier.
+     * Flow: reuse-or-generate UUID → register with social_id
      *
      * @param name User's display name
      * @return RegisterResult indicating success or failure
      */
-    fun registerWithFirebase(name: String): RegisterResult {
+    fun registerAnonymously(name: String): RegisterResult {
         if (!isOperating.compareAndSet(false, true)) {
             return RegisterResult.Error("Operation in progress")
         }
@@ -196,44 +197,44 @@ class AuthSyncService {
                 return RegisterResult.Error(nameValidation.errorMessage ?: "Invalid name")
             }
 
-            // Step 1: Firebase Anonymous Sign-in to get UID
-            logger.debug("Starting Firebase anonymous authentication")
-            when (val firebaseResult = FirebaseAuthService.signInAnonymously()) {
-                is FirebaseAuthService.FirebaseAuthResult.Success -> {
-                    val socialId = firebaseResult.uid
-                    logger.debug("Firebase auth successful, got UID: $socialId")
+            // Step 1: Obtain a stable anonymous identifier.
+            //
+            // This used to call Firebase anonymous sign-in purely to obtain a random UID,
+            // which was then handed to the backend as an opaque `social_id`. No Firebase
+            // ID token was ever sent, so the backend could not (and did not) verify
+            // anything about it -- Firebase contributed a random string and nothing else,
+            // at the cost of a network round-trip, an extra failure mode, and a Google API
+            // key shipped in a public repository. A locally generated UUID is the same
+            // guarantee with none of that.
+            //
+            // Reuse a previously stored id when present so re-registering does not orphan
+            // the account the user already has on the server.
+            val cache = AuthCacheService.getInstance()
+            val socialId = cache.getSocialId() ?: UUID.randomUUID().toString()
 
-                    // Step 2: Register with backend using social_id
-                    when (val result = AuthApiService.registerWithSocialId(name, socialId)) {
-                        is AuthResult.Success -> {
-                            // Save to cache
-                            AuthCacheService.getInstance().saveAuth(
-                                user = result.user,
-                                token = result.token,
-                                tokenType = result.tokenType,
-                                rememberMe = true // Auto remember for social login
-                            )
+            // Step 2: Register with backend using social_id
+            when (val result = AuthApiService.registerWithSocialId(name, socialId)) {
+                is AuthResult.Success -> {
+                    // Save to cache
+                    cache.saveAuth(
+                        user = result.user,
+                        token = result.token,
+                        tokenType = result.tokenType,
+                        rememberMe = true // Auto remember for social login
+                    )
 
-                            // Also save Firebase UID for future reference
-                            AuthCacheService.getInstance().saveSocialId(socialId)
+                    // Persist the anonymous id so this device keeps the same identity
+                    cache.saveSocialId(socialId)
 
-                            logger.info("Firebase registration successful: ${result.user.name}")
-                            onAuthStateChanged?.invoke(AuthState.LoggedIn(result.user))
-                            return RegisterResult.Success(result.user)
-                        }
-
-                        is AuthResult.Error -> {
-                            logger.warn("Backend registration failed: ${result.message}")
-                            onAuthStateChanged?.invoke(AuthState.Error(result.message))
-                            return RegisterResult.Error(result.message, result.fieldErrors)
-                        }
-                    }
+                    logger.info("Anonymous registration successful: ${result.user.name}")
+                    onAuthStateChanged?.invoke(AuthState.LoggedIn(result.user))
+                    return RegisterResult.Success(result.user)
                 }
 
-                is FirebaseAuthService.FirebaseAuthResult.Error -> {
-                    logger.warn("Firebase auth failed: ${firebaseResult.message}")
-                    onAuthStateChanged?.invoke(AuthState.Error(firebaseResult.message))
-                    return RegisterResult.Error("Firebase authentication failed: ${firebaseResult.message}")
+                is AuthResult.Error -> {
+                    logger.warn("Backend registration failed: ${result.message}")
+                    onAuthStateChanged?.invoke(AuthState.Error(result.message))
+                    return RegisterResult.Error(result.message, result.fieldErrors)
                 }
             }
         } finally {

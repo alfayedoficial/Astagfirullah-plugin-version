@@ -107,11 +107,11 @@ object AuthApiService {
     }
 
     /**
-     * Registers a new user account using Firebase Anonymous social_id.
+     * Registers a new user account using an anonymous social_id.
      * Uses POST with JSON body: name, role, social_id, app_type
      *
      * @param name User's display name
-     * @param socialId Firebase Anonymous UID
+     * @param socialId Locally generated anonymous identifier (opaque to the backend)
      * @return AuthResult.Success with user and token, or AuthResult.Error with message
      */
     fun registerWithSocialId(name: String, socialId: String): AuthResult {

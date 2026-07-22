@@ -12,7 +12,7 @@ import javax.swing.*
 
 /**
  * Registration form panel with name, email, password, and confirm password fields.
- * Also supports quick registration with Firebase Anonymous (name only).
+ * Also supports quick anonymous registration (name only).
  */
 class RegisterFormPanel(
     private val onRegisterClicked: (name: String, email: String, password: String) -> Unit,
@@ -362,7 +362,7 @@ class RegisterFormPanel(
     }
 
     /**
-     * Performs quick registration with Firebase Anonymous (name only).
+     * Performs quick anonymous registration (name only).
      */
     private fun performQuickRegister() {
         if (isLoading) return
