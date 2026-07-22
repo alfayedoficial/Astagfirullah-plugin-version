@@ -153,6 +153,19 @@ intellijPlatform {
    }
 }
 
+// verifyPluginProjectConfiguration raises two advisories here. Both are deliberate
+// consequences of supporting a RANGE rather than a single platform, and neither should be
+// "fixed" as suggested:
+//
+//  1. "since-build 242 is lower than target platform 262" -- yes. We build against the
+//     newest supported platform but support back to 2024.2. Following the advice and
+//     raising since-build to 262 would drop every user below 2026.2. The real risk it
+//     hints at (accidentally calling an API that only exists in 2026.x) is caught by the
+//     Plugin Verifier running against the 242 floor, which is why that matrix job exists.
+//
+//  2. "sourceCompatibility 21 but 2026.2 requires Java 25" -- Java 21 is correct. It is
+//     the lowest common denominator across 242..262, and Java 21 bytecode runs fine on a
+//     Java 25 runtime. Compiling to 25 would make the plugin unloadable on 2024.2.
 tasks {
    // 2024.2+ requires Java 21.
    withType<JavaCompile> {
