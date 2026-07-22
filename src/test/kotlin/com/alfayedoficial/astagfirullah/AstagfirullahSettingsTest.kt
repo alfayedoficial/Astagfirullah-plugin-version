@@ -664,4 +664,38 @@ class AstagfirullahSettingsTest {
             assertEquals("3.0.0", restored.lastWhatsNewVersion)
         }
     }
+
+    @Nested
+    @DisplayName("Anonymous Telemetry Settings Tests")
+    inner class TelemetryTests {
+
+        @Test
+        @DisplayName("Anonymous stats are enabled by default")
+        fun enabledByDefault() {
+            assertTrue(settings.anonymousStatsEnabled)
+        }
+
+        @Test
+        @DisplayName("Device id is empty until first requested, then stable")
+        fun deviceIdLazyAndStable() {
+            assertEquals("", settings.telemetryDeviceId)
+            val first = settings.getOrCreateDeviceId()
+            assertTrue(first.isNotBlank())
+            assertEquals(first, settings.getOrCreateDeviceId())
+            assertEquals(first, settings.telemetryDeviceId)
+        }
+
+        @Test
+        @DisplayName("Pending count and device id survive serialization")
+        fun survivesSerialization() {
+            settings.anonymousStatsEnabled = false
+            settings.pendingStatsCount = 42
+            val id = settings.getOrCreateDeviceId()
+            val restored = AstagfirullahSettings()
+            XmlSerializerUtil.copyBean(settings.state, restored.state)
+            assertFalse(restored.anonymousStatsEnabled)
+            assertEquals(42, restored.pendingStatsCount)
+            assertEquals(id, restored.telemetryDeviceId)
+        }
+    }
 }

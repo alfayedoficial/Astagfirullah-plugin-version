@@ -73,7 +73,19 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
          * differs from the running version, the What's New dialog is shown once on the next
          * IDE open. Empty means it has never been shown.
          */
-        var lastWhatsNewVersion: String = ""
+        var lastWhatsNewVersion: String = "",
+        /**
+         * Whether anonymous, aggregate usage statistics (a count of remembrance phrases
+         * displayed) may be sent. Default on; the user can opt out in Settings. No personal
+         * data is ever sent — only a random device id, a count, and the platform.
+         */
+        var anonymousStatsEnabled: Boolean = true,
+        /** Random per-install id for anonymous stats. Generated lazily; contains no PII. */
+        var telemetryDeviceId: String = "",
+        /** Phrases displayed but not yet acknowledged by the backend, carried across restarts. */
+        var pendingStatsCount: Int = 0,
+        /** Epoch millis of the last successful stats flush; 0 if never. */
+        var lastStatsFlushTime: Long = 0L
     )
 
     override fun getState(): State = myState
@@ -141,6 +153,31 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
     var lastWhatsNewVersion: String
         get() = myState.lastWhatsNewVersion
         set(value) { myState.lastWhatsNewVersion = value }
+
+    var anonymousStatsEnabled: Boolean
+        get() = myState.anonymousStatsEnabled
+        set(value) { myState.anonymousStatsEnabled = value }
+
+    var telemetryDeviceId: String
+        get() = myState.telemetryDeviceId
+        set(value) { myState.telemetryDeviceId = value }
+
+    var pendingStatsCount: Int
+        get() = myState.pendingStatsCount
+        set(value) { myState.pendingStatsCount = value }
+
+    var lastStatsFlushTime: Long
+        get() = myState.lastStatsFlushTime
+        set(value) { myState.lastStatsFlushTime = value }
+
+    /** Returns the device id, generating and persisting one on first use. */
+    @Synchronized
+    fun getOrCreateDeviceId(): String {
+        if (myState.telemetryDeviceId.isBlank()) {
+            myState.telemetryDeviceId = java.util.UUID.randomUUID().toString()
+        }
+        return myState.telemetryDeviceId
+    }
 
     /**
      * Whether the "What's New" dialog should be shown for [currentVersion].

@@ -69,6 +69,12 @@ spiritual reflection with supplications, glorification, and blessings upon the P
     <li>Favorite language tracking</li>
 </ul>
 
+<p><b>Privacy</b></p>
+<p>The plugin sends anonymous, aggregate usage counts (how many remembrance phrases were displayed)
+to help improve the app. Only a random device identifier, a count, and the platform are sent &mdash;
+never your name, email, files, projects, or code. You can turn this off any time in
+Settings &rarr; Tools &rarr; Astagfirullah.</p>
+
 <br/>
 
 <h3>Available Everywhere</h3>
@@ -236,6 +242,9 @@ spiritual reflection with supplications, glorification, and blessings upon the P
 
         <!-- Application-level Quran audio player (one shared player across projects) -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.quran.QuranAudioPlayer"/>
+
+        <!-- Application-level anonymous usage telemetry (hourly, opt-out, no PII) -->
+        <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.telemetry.PraiseTelemetryService"/>
 
         <!-- Application-level service for authentication caching -->
         <applicationService serviceImplementation="com.alfayedoficial.astagfirullah.data.cache.AuthCacheService"/>

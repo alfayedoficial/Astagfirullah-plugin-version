@@ -72,6 +72,14 @@ class StatisticsService : PersistentStateComponent<StatisticsService.State> {
 
         // Update favorite language
         updateFavoriteLanguage()
+
+        // Feed the anonymous hourly telemetry so usage from users who are NOT logged in is
+        // counted too. Centralized here so every record site (builds, daily dhikr, tool
+        // window) contributes through one path. Guarded: local statistics must never fail
+        // because telemetry (or, in plain unit tests, the platform Application) is absent.
+        runCatching {
+            com.alfayedoficial.astagfirullah.data.telemetry.PraiseTelemetryService.getInstance().record(count)
+        }
     }
 
     /**

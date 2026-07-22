@@ -11,6 +11,11 @@ Astagfirullah 3.0.0 is a major release that supersedes the never-published 2.1.0
 upgrading from 2.0.1 on the Marketplace, everything below is new to you.
 
 ### Added
+- **Anonymous usage insight** — every install now contributes an anonymous, aggregate count
+  of remembrance phrases displayed (not only logged-in accounts, which were the only ones
+  counted before). Sent hourly in the background keyed by a random per-install device id;
+  no name, email, file, project, or code is ever transmitted. Disclosed in the description
+  and switchable off in Settings → Tools → Astagfirullah
 - **Quran Audio Player** — a dedicated Quran tool window to listen to the Holy Quran inside
   the IDE. Pick from 200+ reciters (mp3quran.net), search any surah by name or number, and
   play / pause / skip between surahs, streamed online with no downloads. Reciter and surah

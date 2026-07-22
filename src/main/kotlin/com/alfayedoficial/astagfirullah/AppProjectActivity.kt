@@ -35,6 +35,9 @@ class AppProjectActivity : ProjectActivity {
         // Sync phrases from API and check for updates in background
         syncAndCheckUpdates(project)
 
+        // Start the hourly anonymous telemetry flush (idempotent across projects).
+        com.alfayedoficial.astagfirullah.data.telemetry.PraiseTelemetryService.getInstance().ensureScheduled()
+
         // Display phrases on startup
         buildProgressService.displayPhrasesOnStartup()
 

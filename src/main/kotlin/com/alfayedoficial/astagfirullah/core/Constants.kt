@@ -66,6 +66,14 @@ object Constants {
     // Leaderboard API Endpoints (uses v1)
     const val API_LEADERBOARD_ENDPOINT = "/statistic/top-users"
     const val API_STATISTIC_CREATE_ENDPOINT = "/statistic/create"
+
+    // Anonymous device telemetry (uses v1, NO auth). Accepts a random device id + a count,
+    // so every install's usage is counted, not only logged-in accounts. Sent hourly in the
+    // background, opt-out in Settings, no personal data.
+    const val API_TELEMETRY_PRAISE_ENDPOINT = "/telemetry/praise"
+    const val TELEMETRY_FLUSH_INTERVAL_MINUTES = 60L
+    /** Sanity cap so a runaway counter can never post an implausible number. */
+    const val TELEMETRY_MAX_BATCH = 100_000
     const val LEADERBOARD_DEFAULT_LIMIT = 50
     const val LEADERBOARD_TOOL_WINDOW_LIMIT = 5
 

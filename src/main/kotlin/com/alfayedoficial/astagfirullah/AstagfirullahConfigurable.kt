@@ -51,6 +51,7 @@ class AstagfirullahConfigurable : Configurable {
     private lateinit var soundCheckBox: JCheckBox
     private lateinit var startupCheckBox: JCheckBox
     private lateinit var dailyDhikrCheckBox: JCheckBox
+    private lateinit var anonymousStatsCheckBox: JCheckBox
 
     override fun getDisplayName(): String = Constants.PLUGIN_NAME
 
@@ -189,6 +190,13 @@ class AstagfirullahConfigurable : Configurable {
             settings.dailyDhikrEnabled,
         )
         panel.add(dailyDhikrCheckBox, gbc)
+
+        gbc.gridy = row++
+        anonymousStatsCheckBox = JCheckBox(
+            "Share anonymous usage counts to help improve the app (no personal data)",
+            settings.anonymousStatsEnabled,
+        )
+        panel.add(anonymousStatsCheckBox, gbc)
 
         // Info panel
         gbc.gridy = row++
@@ -772,7 +780,8 @@ class AstagfirullahConfigurable : Configurable {
                 delayComboBox.selectedItem != settings.delaySeconds ||
                 soundCheckBox.isSelected != settings.soundEnabled ||
                 startupCheckBox.isSelected != settings.showOnStartup ||
-                dailyDhikrCheckBox.isSelected != settings.dailyDhikrEnabled
+                dailyDhikrCheckBox.isSelected != settings.dailyDhikrEnabled ||
+                anonymousStatsCheckBox.isSelected != settings.anonymousStatsEnabled
     }
 
     override fun apply() {
@@ -781,6 +790,7 @@ class AstagfirullahConfigurable : Configurable {
         settings.soundEnabled = soundCheckBox.isSelected
         settings.showOnStartup = startupCheckBox.isSelected
         settings.dailyDhikrEnabled = dailyDhikrCheckBox.isSelected
+        settings.anonymousStatsEnabled = anonymousStatsCheckBox.isSelected
     }
 
     override fun reset() {
@@ -789,5 +799,6 @@ class AstagfirullahConfigurable : Configurable {
         soundCheckBox.isSelected = settings.soundEnabled
         startupCheckBox.isSelected = settings.showOnStartup
         dailyDhikrCheckBox.isSelected = settings.dailyDhikrEnabled
+        anonymousStatsCheckBox.isSelected = settings.anonymousStatsEnabled
     }
 }
