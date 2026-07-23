@@ -26,12 +26,26 @@
 
 **Astagfirullah** is an IntelliJ IDEA plugin that displays beautiful Islamic remembrance phrases (Dhikr) during Gradle builds, project sync, and other waiting periods. Turn idle moments into opportunities for spiritual reflection with supplications, glorification, and blessings upon the Prophet Muhammad (peace be upon him).
 
+> **Supported IDEs:** IntelliJ 2024.2 through 2026.2 (build 242–262.*), every release verified by the JetBrains Plugin Verifier. On 2023.2–2024.1? Use version 2.0.1.
+
 ## Features
 
 ### Multilingual Support
 - **7 Languages**: Arabic (العربية), English, Urdu (أردو), Farsi (فارسى), Turkish (Türkçe), Indonesian (Bahasa), Bengali (বাংলা)
 - **31+ authentic Islamic supplications** and phrases
 - **Dynamic phrases** synced from server with offline support
+
+### Quran Audio Player
+- Listen to the Holy Quran inside your IDE — a dedicated **Quran tool window**
+- Choose from **200+ reciters** and search any surah by name or number
+- Play, pause and skip between surahs, **streamed online** with no downloads
+- Reciter and surah names follow your chosen language
+
+### Daily Remembrance
+- A gentle **dhikr window every time you open a project**, with a rotating link to our other apps
+- Closes itself after **7 seconds** with a visible countdown — never blocks your work
+- Right-to-left rendering for Arabic, Urdu and Farsi
+- Turn it off any time in Settings → Tools → Astagfirullah
 
 ### Smart Integration
 - Automatically displays during **Gradle builds** and **project sync**
@@ -49,6 +63,13 @@
 - Daily usage count
 - Session statistics
 - Favorite language tracking
+- Worldwide **"Total dhikr"** counter shown in Settings
+
+### Available Everywhere
+Astagfirullah goes wherever you do — also on **Android**, **iOS**, and as **Chrome / Edge / Firefox extensions**. Find them all at [astaghfirullah.4fdev.com](https://astaghfirullah.4fdev.com/) and [afapps.4fdev.com](https://afapps.4fdev.com/).
+
+### Privacy
+The plugin sends **anonymous, aggregate** usage counts (how many remembrance phrases were displayed) to help improve the app. Only a random device identifier, a count, and the platform are sent — never your name, email, files, projects, or code. Opt out any time in Settings. See our [Privacy Policy](https://astaghfirullah.4fdev.com/privacy).
 
 ## Installation
 
@@ -85,8 +106,8 @@
 ## Building from Source
 
 ### Prerequisites
-- JDK 17 or higher
-- Gradle 8.x
+- JDK 21 or higher (IntelliJ Platform 2024.2+ requires Java 21)
+- Gradle 9.x (provided via the wrapper)
 
 ### Build Commands
 
@@ -193,12 +214,15 @@ We welcome contributions from the community! Here's how you can help:
 
 See [CHANGELOG](CHANGELOG.md) for version history.
 
-### Latest: Version 2.0.0
-- Professional Settings UI with tabbed interface
-- Statistics dashboard with visual cards
-- API integration for dynamic phrases
-- Improved rating prompt flow
-- Production-ready logging
+### Latest: Version 3.0.0 — Everywhere You Are
+- **Quran audio player** — 200+ reciters, search any surah, play inside the IDE
+- **Dhikr window** every time you open a project (7s, self-closing, rotating promo)
+- **IntelliJ 2024.2 → 2026.2** support, verified across every release
+- Right-to-left rendering for Arabic, Urdu and Farsi
+- **"What's New"** screen on upgrade + a worldwide Total dhikr counter in Settings
+- Also on **Android, iOS and browser extensions**
+- Modernised build (IntelliJ Platform Gradle Plugin 2.x, Kotlin 2.4, Java 21) with CI + Plugin Verifier
+- **Minimum IDE is now 2024.2** — users on 2023.2–2024.1 stay on 2.0.1
 
 ## License
 
