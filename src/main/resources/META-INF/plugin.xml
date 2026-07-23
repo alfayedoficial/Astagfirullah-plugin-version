@@ -40,8 +40,8 @@ spiritual reflection with supplications, glorification, and blessings upon the P
 
 <p><b>Daily Remembrance</b></p>
 <ul>
-    <li>A gentle dhikr window when you open your IDE, once a day</li>
-    <li>Closes itself after 5 seconds with a visible countdown - never blocks your work</li>
+    <li>A gentle dhikr window every time you open a project</li>
+    <li>Closes itself after 7 seconds with a visible countdown - never blocks your work</li>
     <li>Right-to-left rendering for Arabic, Urdu and Farsi</li>
     <li>Turn it off any time in Settings &rarr; Tools &rarr; Astagfirullah</li>
 </ul>
@@ -125,7 +125,7 @@ Settings &rarr; Tools &rarr; Astagfirullah.</p>
     <li><b>NEW:</b> Quran Audio Player - listen to the Holy Quran inside your IDE. Pick from 200+ reciters, search any surah, and play/pause/skip, streamed online. Names follow your chosen language</li>
     <li><b>NEW:</b> A "What's New" welcome the first time you open each new version</li>
     <li><b>NEW:</b> Available Everywhere - Astagfirullah is also on <b>Android</b>, <b>iOS</b>, and as <b>Chrome / Edge / Firefox extensions</b>. Find them all at <a href="https://astaghfirullah.4fdev.com/">astaghfirullah.4fdev.com</a> and <a href="https://afapps.4fdev.com/">afapps.4fdev.com</a></li>
-    <li><b>NEW:</b> Daily dhikr window when you open your IDE - a random remembrance phrase that closes itself after 5 seconds, shown at most once a day and never blocking your work</li>
+    <li><b>NEW:</b> Dhikr window every time you open a project - a random remembrance phrase, with a rotating link to our other apps, that closes itself after 7 seconds and never blocks your work</li>
     <li><b>NEW:</b> Right-to-left rendering for Arabic, Urdu and Farsi</li>
     <li><b>FIXED:</b> The plugin could not be installed on IntelliJ 2026.1 or 2026.2 at all. It now supports up to <b>2026.2</b>, verified against every release in the range</li>
     <li><b>FIXED:</b> A stale internal version could prompt you to "update" to the build you were already running</li>

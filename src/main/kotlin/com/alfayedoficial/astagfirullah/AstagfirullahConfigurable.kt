@@ -214,7 +214,7 @@ class AstagfirullahConfigurable : Configurable {
 
         gbc.gridy = row++
         dailyDhikrCheckBox = JCheckBox(
-            "Show a daily dhikr window when the IDE opens (once a day, closes itself)",
+            "Show a dhikr window each time you open a project (closes itself)",
             settings.dailyDhikrEnabled,
         )
         panel.add(dailyDhikrCheckBox, gbc)

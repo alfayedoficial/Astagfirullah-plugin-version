@@ -4,16 +4,13 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 /**
- * Shows [DailyDhikrDialog] when the IDE opens — at most once per calendar day.
+ * Shows [DailyDhikrDialog] every time a project is opened.
  *
- * IntelliJ runs a startup activity **once per opened project**, not once per IDE launch.
- * Opening three projects in a morning would therefore mean three popups, which is exactly
- * the behaviour that earns one-star reviews, so the once-a-day cap is enforced here
- * rather than left to the dialog.
+ * IntelliJ runs a startup activity once per opened project, so this greets the user on every
+ * project window (owner's request). The dialog is non-modal and self-dismissing, so it never
+ * blocks work; users who don't want it can turn it off in Settings.
  */
 class DailyDhikrActivity : ProjectActivity {
 
@@ -29,24 +26,17 @@ class DailyDhikrActivity : ProjectActivity {
                 return
             }
 
-            val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-            if (!settings.shouldShowDailyDhikr(today)) {
-                logger.debug("Skipping daily dhikr: disabled, or already shown on $today")
+            if (!settings.dailyDhikrEnabled) {
+                logger.debug("Skipping daily dhikr: disabled in settings")
                 return
             }
 
             val phrase = TranslatePhrases.selectedTranslatePhrases().firstOrNull()
             if (phrase.isNullOrBlank()) {
-                // No cached or static phrase available — show nothing rather than an
-                // empty dialog, and leave the date unstamped so it can retry later.
+                // No cached or static phrase available — show nothing rather than an empty dialog.
                 logger.warn("Skipping daily dhikr: no phrase available")
                 return
             }
-
-            // Stamp the date BEFORE showing. Two projects can finish starting up almost
-            // simultaneously; stamping first means the second one reads the new date and
-            // bails, instead of both passing the check and opening two dialogs.
-            settings.lastDailyDhikrDate = today
 
             ApplicationManager.getApplication().invokeLater {
                 try {

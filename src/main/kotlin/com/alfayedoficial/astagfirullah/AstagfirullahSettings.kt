@@ -60,14 +60,8 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
         var ratingPrompted: Boolean = false,
         var firstSetupCompleted: Boolean = false,
         var lastRatingPromptTime: Long = 0L,
-        /** Whether the once-a-day dhikr dialog is shown when the IDE opens. */
+        /** Whether the dhikr dialog is shown every time a project opens. */
         var dailyDhikrEnabled: Boolean = Constants.DEFAULT_DAILY_DHIKR_ENABLED,
-        /**
-         * ISO date (yyyy-MM-dd) the daily dhikr dialog last appeared, used to cap it at
-         * once per day. Stored as a string rather than an epoch so the comparison is a
-         * plain calendar-day check and cannot drift with timezone maths.
-         */
-        var lastDailyDhikrDate: String = "",
         /**
          * The plugin version whose "What's New" screen the user has already seen. When it
          * differs from the running version, the What's New dialog is shown once on the next
@@ -140,20 +134,6 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
     var dailyDhikrEnabled: Boolean
         get() = myState.dailyDhikrEnabled
         set(value) { myState.dailyDhikrEnabled = value }
-
-    var lastDailyDhikrDate: String
-        get() = myState.lastDailyDhikrDate
-        set(value) { myState.lastDailyDhikrDate = value }
-
-    /**
-     * Whether the daily dhikr dialog should be shown for [today].
-     *
-     * Caps the dialog at once per calendar day. IntelliJ fires a startup activity per
-     * OPENED PROJECT, so without this check a developer opening three projects in one
-     * morning would get three popups.
-     */
-    fun shouldShowDailyDhikr(today: String): Boolean =
-        dailyDhikrEnabled && lastDailyDhikrDate != today
 
     var lastWhatsNewVersion: String
         get() = myState.lastWhatsNewVersion

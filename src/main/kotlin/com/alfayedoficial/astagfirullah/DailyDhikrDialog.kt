@@ -89,9 +89,17 @@ class DailyDhikrDialog(
         }
         countdownLabel = countdown
 
+        // A random product promotion under the phrase — a different one each time the window
+        // appears (owner's request). Cross-promotion of the developer's own apps.
+        val promo = com.alfayedoficial.astagfirullah.ui.components.CrossPlatformBanner.randomPromoLine().apply {
+            alignmentX = Component.CENTER_ALIGNMENT
+        }
+
         content.add(Box.createVerticalGlue())
         content.add(phraseLabel)
-        content.add(Box.createVerticalStrut(20))
+        content.add(Box.createVerticalStrut(18))
+        content.add(promo)
+        content.add(Box.createVerticalStrut(16))
         content.add(countdown)
         content.add(Box.createVerticalGlue())
 

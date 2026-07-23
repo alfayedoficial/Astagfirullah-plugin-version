@@ -56,6 +56,28 @@ object CrossPlatformBanner {
         return panel
     }
 
+    /** The pool of one-line product promotions used in the daily dhikr window. */
+    private val PROMOS: List<Pair<String, String>> = listOf(
+        "📱  Also on Android & iOS" to Constants.WEBSITE_ASTAGHFIRULLAH,
+        "🧩  Get the browser extension" to Constants.WEBSITE_ASTAGHFIRULLAH,
+        "🕌  Listen to the Quran anywhere" to Constants.WEBSITE_ASTAGHFIRULLAH,
+        "🌐  More apps from AFApps" to Constants.WEBSITE_AFAPPS,
+    )
+
+    /**
+     * A single, randomly chosen product promotion line with a clickable link — used under the
+     * phrase in the daily dhikr window so a different product is surfaced each time.
+     */
+    fun randomPromoLine(): JComponent {
+        val (label, url) = PROMOS[kotlin.random.Random.nextInt(PROMOS.size)]
+        val row = JPanel(java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 8, 0)).apply { isOpaque = false }
+        row.add(JBLabel(label).apply { foreground = JBColor.GRAY })
+        row.add(HyperlinkLabel(prettyHost(url)).apply {
+            addHyperlinkListener { BrowserUtil.openUrl(url) }
+        })
+        return row
+    }
+
     private fun platformRow(label: String, url: String): JComponent {
         val row = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.X_AXIS)

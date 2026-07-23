@@ -111,6 +111,14 @@ sourceSets {
 }
 
 intellijPlatform {
+   // buildSearchableOptions launches a full headless IDE to pre-index Settings for search.
+   // It needs network to reach the plugin marketplace and fails offline inside the platform's
+   // own PluginManagerConfigurablePanel disposal ("Main plugin repository is not available"),
+   // which has nothing to do with this plugin. It is optional (the only cost is that our
+   // Settings page is not keyword-searchable from the IDE-wide search), flaky, and slow, so
+   // it is disabled — a common and JetBrains-accepted choice.
+   buildSearchableOptions = false
+
    pluginConfiguration {
       // Single source of truth for the version: `project.version` above. plugin.xml does
       // not hardcode <version>, so the two cannot drift.

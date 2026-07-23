@@ -111,7 +111,7 @@ object Constants {
 
     // Daily dhikr startup dialog
     /** Seconds the dialog stays up before dismissing itself. */
-    const val DAILY_DHIKR_COUNTDOWN_SECONDS = 5
+    const val DAILY_DHIKR_COUNTDOWN_SECONDS = 7
     /** Countdown tick interval; 1s so the label counts down in whole seconds. */
     const val DAILY_DHIKR_TICK_MS = 1000
     const val DEFAULT_DAILY_DHIKR_ENABLED = true
