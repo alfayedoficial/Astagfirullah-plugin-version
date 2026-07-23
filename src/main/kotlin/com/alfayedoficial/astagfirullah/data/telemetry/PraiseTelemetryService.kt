@@ -62,6 +62,10 @@ class PraiseTelemetryService {
      */
     fun flush() {
         if (!settings.anonymousStatsEnabled) return
+        // Only anonymous (not-logged-in) usage goes through this path. A logged-in user's
+        // praise is already counted under their account, so sending it here too would
+        // double-count them in the system-wide grand total.
+        if (com.alfayedoficial.astagfirullah.data.cache.AuthCacheService.getInstance().isLoggedIn()) return
         if (!sending.compareAndSet(false, true)) return
         try {
             val count = synchronized(this) { settings.pendingStatsCount }
