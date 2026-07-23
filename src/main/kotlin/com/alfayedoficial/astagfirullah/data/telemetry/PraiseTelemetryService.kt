@@ -84,6 +84,25 @@ class PraiseTelemetryService {
         }
     }
 
+    /**
+     * Fetches the system-wide "Total dhikr" figure. Blocking; call from a background thread.
+     * Returns null on any network/parse failure so the caller can fall back to the cached
+     * value. On success the value is cached in settings for offline display.
+     */
+    fun fetchTotalDhikr(): Long? {
+        val url = "${Constants.API_BASE_URL_V1}${Constants.API_TELEMETRY_TOTAL_ENDPOINT}"
+        return when (val res = com.alfayedoficial.astagfirullah.data.api.ApiHelper.get(url)) {
+            is com.alfayedoficial.astagfirullah.data.api.ApiHelper.HttpResult.Success -> runCatching {
+                // { "success": true, "data": { "total_dhikr": <n> } }
+                val obj = com.google.gson.JsonParser.parseString(res.body).asJsonObject
+                val total = obj.getAsJsonObject("data").get("total_dhikr").asLong
+                settings.cachedTotalDhikr = total
+                total
+            }.getOrNull()
+            is com.alfayedoficial.astagfirullah.data.api.ApiHelper.HttpResult.Error -> null
+        }
+    }
+
     private fun postCount(deviceId: String, count: Int): Boolean {
         val url = "${Constants.API_BASE_URL_V1}${Constants.API_TELEMETRY_PRAISE_ENDPOINT}"
         var connection: HttpURLConnection? = null

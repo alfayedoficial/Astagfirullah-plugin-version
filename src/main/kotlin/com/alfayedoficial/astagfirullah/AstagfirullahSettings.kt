@@ -85,7 +85,12 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
         /** Phrases displayed but not yet acknowledged by the backend, carried across restarts. */
         var pendingStatsCount: Int = 0,
         /** Epoch millis of the last successful stats flush; 0 if never. */
-        var lastStatsFlushTime: Long = 0L
+        var lastStatsFlushTime: Long = 0L,
+        /**
+         * Last "Total dhikr" figure fetched from the server, shown in Settings. Cached so it
+         * can be displayed offline; -1 means never fetched.
+         */
+        var cachedTotalDhikr: Long = -1L
     )
 
     override fun getState(): State = myState
@@ -169,6 +174,10 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
     var lastStatsFlushTime: Long
         get() = myState.lastStatsFlushTime
         set(value) { myState.lastStatsFlushTime = value }
+
+    var cachedTotalDhikr: Long
+        get() = myState.cachedTotalDhikr
+        set(value) { myState.cachedTotalDhikr = value }
 
     /** Returns the device id, generating and persisting one on first use. */
     @Synchronized

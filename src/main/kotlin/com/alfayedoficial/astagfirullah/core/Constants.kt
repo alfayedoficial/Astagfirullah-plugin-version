@@ -71,6 +71,7 @@ object Constants {
     // so every install's usage is counted, not only logged-in accounts. Sent hourly in the
     // background, opt-out in Settings, no personal data.
     const val API_TELEMETRY_PRAISE_ENDPOINT = "/telemetry/praise"
+    const val API_TELEMETRY_TOTAL_ENDPOINT = "/telemetry/total"
     const val TELEMETRY_FLUSH_INTERVAL_MINUTES = 60L
     /** Sanity cap so a runaway counter can never post an implausible number. */
     const val TELEMETRY_MAX_BATCH = 100_000
