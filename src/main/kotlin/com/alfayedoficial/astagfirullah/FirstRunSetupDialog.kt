@@ -64,6 +64,10 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
 
     init {
         title = "Astagfirullah Setup"
+        // Non-modal so it never blocks the EDT / IDE startup. A modal wizard auto-shown on
+        // project open stalled the Marketplace IDE-run verifier (10-minute timeout) and kept
+        // the IDE Trial widget from initializing. Non-modal also lets users keep working.
+        isModal = false
         init()
     }
 
@@ -114,11 +118,15 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
         // Features list \u2014 sourced from the shared WhatsNew highlights so the wizard, the
         // About tab and the What's New dialog stay in sync.
         val featuresHtml = buildString {
-            append("<html><div style='text-align: left;'><b>What's New in ")
+            // Swing's HTML label ignores a CSS width on <div>/<body>, so the label sizes to its
+            // widest line and, centered in the FlowLayout, overflows and clips both edges of the
+            // wizard panel. A <table width=...> IS honored by Swing, so it forces the text to wrap.
+            append("<html><table width='490' cellspacing='0' cellpadding='0'><tr>")
+            append("<td style='text-align: left;'><b>What's New in ")
             append(Constants.PLUGIN_VERSION)
             append(":</b><br><br>")
             WhatsNew.HIGHLIGHTS.forEach { append("\u2022 ").append(it).append("<br><br>") }
-            append("</div></html>")
+            append("</td></tr></table></html>")
         }
         val featuresLabel = JBLabel(featuresHtml)
         featuresLabel.font = featuresLabel.font.deriveFont(13f)

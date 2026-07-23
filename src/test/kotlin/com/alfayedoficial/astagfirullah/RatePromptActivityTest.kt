@@ -293,16 +293,20 @@ class RatePromptActivityTest {
     inner class ShouldShowRatePromptTests {
 
         @Test
-        @DisplayName("Should record install time on first run")
-        fun testRecordInstallTimeOnFirstRun() = runTest {
-            // Given - first run (installTime = 0)
+        @DisplayName("Should NOT record install time on first run (setup wizard owns it)")
+        fun testDefersInstallTimeToWizardOnFirstRun() = runTest {
+            // Given - first run (installTime = 0), before the setup wizard has completed
             `when`(mockSettings.installTime).thenReturn(0L)
 
             // When
             activity.execute(mockProject)
 
-            // Then - should set install time
-            verify(mockSettings).installTime = any()
+            // Then - must NOT stamp installTime here. Doing so would prematurely flip
+            // isFirstRun() to false and let DailyDhikrActivity's popup appear on top of the
+            // setup wizard. Install time is recorded by FirstRunSetupDialog on complete/skip.
+            verify(mockSettings, never()).installTime = any()
+            // And no rating notification is shown on the first install.
+            verify(mockNotification, never()).notify(any())
         }
 
         @Test
