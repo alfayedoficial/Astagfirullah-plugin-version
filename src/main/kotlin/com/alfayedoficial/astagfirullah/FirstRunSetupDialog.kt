@@ -111,18 +111,16 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
         descPanel.add(descLabel)
         descPanel.add(Box.createVerticalStrut(30))
 
-        // Features list
-        val featuresLabel = JBLabel("<html>" +
-                "<div style='text-align: left;'>" +
-                "<b>Features:</b><br><br>" +
-                "\u2022 Support for 7 languages (Arabic, English, Urdu, Farsi, Turkish, Indonesian, Bengali)<br><br>" +
-                "\u2022 User Authentication - Login and track your progress<br><br>" +
-                "\u2022 Global Leaderboard - Compete with users worldwide<br><br>" +
-                "\u2022 Beautiful blessing sound upon the Prophet (peace be upon him)<br><br>" +
-                "\u2022 Display remembrance phrases during builds and sync<br><br>" +
-                "\u2022 Usage statistics tracking with daily/weekly/monthly rankings<br><br>" +
-                "\u2022 Smart update notifications" +
-                "</div></html>")
+        // Features list \u2014 sourced from the shared WhatsNew highlights so the wizard, the
+        // About tab and the What's New dialog stay in sync.
+        val featuresHtml = buildString {
+            append("<html><div style='text-align: left;'><b>What's New in ")
+            append(Constants.PLUGIN_VERSION)
+            append(":</b><br><br>")
+            WhatsNew.HIGHLIGHTS.forEach { append("\u2022 ").append(it).append("<br><br>") }
+            append("</div></html>")
+        }
+        val featuresLabel = JBLabel(featuresHtml)
         featuresLabel.font = featuresLabel.font.deriveFont(13f)
         featuresLabel.alignmentX = Component.CENTER_ALIGNMENT
 
