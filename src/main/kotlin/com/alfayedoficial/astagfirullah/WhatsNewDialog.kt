@@ -42,28 +42,21 @@ class WhatsNewDialog(project: Project?) : DialogWrapper(project, false) {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
         }
 
-        content.add(JBLabel("Astagfirullah 3.0.0").apply {
+        content.add(JBLabel("Astagfirullah ${Constants.PLUGIN_VERSION}").apply {
             font = font.deriveFont(Font.BOLD, 22f)
             alignmentX = Component.LEFT_ALIGNMENT
         })
         content.add(Box.createVerticalStrut(4))
-        content.add(JBLabel("Now on the latest IDEs, with a daily moment of remembrance").apply {
+        content.add(JBLabel(WhatsNew.TAGLINE).apply {
             font = font.deriveFont(14f)
             foreground = com.intellij.ui.JBColor.GRAY
             alignmentX = Component.LEFT_ALIGNMENT
         })
         content.add(Box.createVerticalStrut(18))
 
-        content.add(
-            highlights(
-                "Runs on IntelliJ 2024.2 through 2026.2 — including the newest release",
-                "New: a daily dhikr window when you open your IDE, closing itself after 5 seconds",
-                "Turn the daily window off any time in Settings → Tools → Astagfirullah",
-                "Right-to-left rendering for Arabic, Urdu and Farsi",
-                "Faster, lighter sign-in — one less network round-trip",
-                "Under-the-hood: modern build, continuous integration, and a verified compatibility range",
-            )
-        )
+        // Highlights come from the single shared WhatsNew source, so the dialog, the About
+        // tab and the first-run wizard can never drift apart.
+        content.add(highlights(*WhatsNew.HIGHLIGHTS.toTypedArray()))
 
         content.add(Box.createVerticalStrut(20))
         content.add(CrossPlatformBanner.create().apply { alignmentX = Component.LEFT_ALIGNMENT })

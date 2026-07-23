@@ -559,17 +559,34 @@ class AstagfirullahConfigurable : Configurable {
         contentPanel.add(descPanel)
         contentPanel.add(Box.createVerticalStrut(30))
 
+        // What's New in this version
+        contentPanel.add(TitledSeparator("What's New in ${Constants.PLUGIN_VERSION}"))
+        contentPanel.add(Box.createVerticalStrut(10))
+
+        val whatsNewPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            border = JBUI.Borders.emptyLeft(20)
+            WhatsNew.HIGHLIGHTS.forEach { line ->
+                add(JBLabel("• $line").apply { border = JBUI.Borders.emptyBottom(5) })
+            }
+        }
+        contentPanel.add(whatsNewPanel)
+        contentPanel.add(Box.createVerticalStrut(30))
+
         // Features
         contentPanel.add(TitledSeparator("Features"))
         contentPanel.add(Box.createVerticalStrut(10))
 
         val features = listOf(
+            "Quran audio player — 200+ reciters, search any surah, play inside the IDE",
             "Display dhikr and supplications during build/sync",
+            "A dhikr window every time you open a project (7s, self-closing)",
             "7 languages supported",
             "Configurable display duration (1-10 seconds)",
             "Optional sound for blessings upon the Prophet",
             "Usage statistics tracking",
-            "Offline caching with auto-sync"
+            "Offline caching with auto-sync",
+            "Also on Android, iOS and browser extensions"
         )
 
         val featuresPanel = JPanel().apply {
@@ -582,6 +599,13 @@ class AstagfirullahConfigurable : Configurable {
             }
         }
         contentPanel.add(featuresPanel)
+        contentPanel.add(Box.createVerticalStrut(20))
+
+        // Cross-platform banner (also available on Android / iOS / extensions)
+        val bannerWrap = JPanel(FlowLayout(FlowLayout.CENTER)).apply {
+            add(com.alfayedoficial.astagfirullah.ui.components.CrossPlatformBanner.create())
+        }
+        contentPanel.add(bannerWrap)
         contentPanel.add(Box.createVerticalStrut(30))
 
         // Developer info
