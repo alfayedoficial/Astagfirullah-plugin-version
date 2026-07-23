@@ -5,6 +5,57 @@ All notable changes to the Astagfirullah plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-07-23
+
+Astagfirullah 3.0.0 is a major release that supersedes the never-published 2.1.0. If you are
+upgrading from 2.0.1 on the Marketplace, everything below is new to you.
+
+### Added
+- **Anonymous usage insight** — every install now contributes an anonymous, aggregate count
+  of remembrance phrases displayed (not only logged-in accounts, which were the only ones
+  counted before). Sent hourly in the background keyed by a random per-install device id;
+  no name, email, file, project, or code is ever transmitted. Disclosed in the description
+  and switchable off in Settings → Tools → Astagfirullah
+- **Quran Audio Player** — a dedicated Quran tool window to listen to the Holy Quran inside
+  the IDE. Pick from 200+ reciters (mp3quran.net), search any surah by name or number, and
+  play / pause / skip between surahs, streamed online with no downloads. Reciter and surah
+  names follow the plugin's language setting (all seven languages). MP3 is decoded in-process
+  with JLayer, since the IDE's stock audio stack cannot decode MP3
+- **Available Everywhere** — the plugin now surfaces the rest of the Astagfirullah family:
+  the Android and iOS apps and the Chrome / Edge / Firefox browser extensions, linked from
+  the developer's own sites [astaghfirullah.4fdev.com](https://astaghfirullah.4fdev.com/)
+  and [afapps.4fdev.com](https://afapps.4fdev.com/). Shown in the first-run wizard, in a
+  "What's New" screen, and on the Marketplace listing
+- **"What's New" screen** shown once when you open the IDE after upgrading to a new version
+- Daily dhikr window on IDE startup — a random remembrance phrase with a countdown that
+  closes itself after 5 seconds, at most once a day, non-modal, RTL for Arabic/Urdu/Farsi
+- Setting to turn the daily dhikr window off (Settings → Tools → Astagfirullah → Behavior)
+- Continuous integration: build, unit tests, and the JetBrains Plugin Verifier on every push
+
+### Changed
+- **Supported IDE range is now 2024.2 through 2026.2** (build 242–262.*), every version
+  verified by the Plugin Verifier rather than merely declared
+- **Minimum supported IDE raised to 2024.2.** IntelliJ 2024.2+ requires Java 21, whose
+  bytecode cannot load on older IDEs. Users on 2023.2–2024.1 remain on 2.0.1
+- Migrated to IntelliJ Platform Gradle Plugin 2.x (Gradle 9, Kotlin 2.4, Java 21)
+- The plugin version now has a single source of truth (`project.version`)
+
+### Removed
+- Firebase anonymous sign-in — it only produced a random identifier passed to the backend
+  as an opaque `social_id`, with no token ever sent, so a local UUID is equivalent and
+  removes a bundled Google API key and a network round-trip. Anonymous registration is
+  unchanged from the user's point of view
+
+### Fixed
+- The plugin could not be installed on IntelliJ 2026.1 or 2026.2
+- A stale hardcoded version could nag users to "update" to the build they already ran
+- A Kotlin 2.4 codegen incompatibility that would have crashed the plugin on 2024.2–2025.2
+
+### Security
+- Removed a committed OpenSSH private key and a Marketplace publish token; both revoked/rotated
+- Removed a Google API key that had been committed to the public repository
+- Enabled GitHub secret scanning on the repository
+
 ## [2.1.0] - 2026-07-22
 
 ### Added

@@ -16,7 +16,7 @@ plugins {
 
 
 group = "com.alfayedoficial"
-version = "2.1.0"
+version = "3.0.0"
 
 repositories {
    mavenCentral()
@@ -46,6 +46,17 @@ dependencies {
 
    // Gson for JSON parsing (API responses)
    implementation("com.google.code.gson:gson:2.10.1")
+
+   // JLayer — pure-Java MP3 decoder for the Quran audio player. The IDE's stock
+   // javax.sound.sampled cannot decode MP3, and the Quran audio (mp3quran.net) is MP3.
+   // We use JLayer's Decoder/Bitstream directly and write PCM to a SourceDataLine, rather
+   // than the mp3spi ServiceLoader route, which is unreliable across a plugin classloader.
+   implementation("com.googlecode.soundlibs:jlayer:1.0.1.4") {
+      // JLayer declares a compile dependency on junit 3.8.2, which would otherwise be
+      // bundled into the shipped plugin. A test framework must never leak into the runtime
+      // distribution.
+      exclude(group = "junit", module = "junit")
+   }
 
    // Note: Kotlin stdlib and coroutines are provided by IntelliJ Platform
 
@@ -100,6 +111,14 @@ sourceSets {
 }
 
 intellijPlatform {
+   // buildSearchableOptions launches a full headless IDE to pre-index Settings for search.
+   // It needs network to reach the plugin marketplace and fails offline inside the platform's
+   // own PluginManagerConfigurablePanel disposal ("Main plugin repository is not available"),
+   // which has nothing to do with this plugin. It is optional (the only cost is that our
+   // Settings page is not keyword-searchable from the IDE-wide search), flaky, and slow, so
+   // it is disabled — a common and JetBrains-accepted choice.
+   buildSearchableOptions = false
+
    pluginConfiguration {
       // Single source of truth for the version: `project.version` above. plugin.xml does
       // not hardcode <version>, so the two cannot drift.

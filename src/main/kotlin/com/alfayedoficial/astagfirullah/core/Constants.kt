@@ -16,7 +16,7 @@ object Constants {
      * Fallback used only when the plugin descriptor is unavailable (e.g. plain unit tests
      * with no running IntelliJ Platform). Never read this directly — use [PLUGIN_VERSION].
      */
-    private const val FALLBACK_VERSION = "2.1.0"
+    private const val FALLBACK_VERSION = "3.0.0"
 
     /**
      * The running plugin's version, read from the plugin descriptor that Gradle's
@@ -66,6 +66,15 @@ object Constants {
     // Leaderboard API Endpoints (uses v1)
     const val API_LEADERBOARD_ENDPOINT = "/statistic/top-users"
     const val API_STATISTIC_CREATE_ENDPOINT = "/statistic/create"
+
+    // Anonymous device telemetry (uses v1, NO auth). Accepts a random device id + a count,
+    // so every install's usage is counted, not only logged-in accounts. Sent hourly in the
+    // background, opt-out in Settings, no personal data.
+    const val API_TELEMETRY_PRAISE_ENDPOINT = "/telemetry/praise"
+    const val API_TELEMETRY_TOTAL_ENDPOINT = "/telemetry/total"
+    const val TELEMETRY_FLUSH_INTERVAL_MINUTES = 60L
+    /** Sanity cap so a runaway counter can never post an implausible number. */
+    const val TELEMETRY_MAX_BATCH = 100_000
     const val LEADERBOARD_DEFAULT_LIMIT = 50
     const val LEADERBOARD_TOOL_WINDOW_LIMIT = 5
 
@@ -78,6 +87,12 @@ object Constants {
     const val PLUGIN_MARKETPLACE_URL = "https://plugins.jetbrains.com/plugin/24628-astagfirullah"
     const val DEVELOPER_LINKEDIN_URL = "https://www.linkedin.com/in/alfayedoficial"
     const val LINKEDIN_SHARE_BASE_URL = "https://www.linkedin.com/shareArticle?mini=true&url="
+
+    // Product / ecosystem websites. These are the developer's own sites and are the
+    // canonical hubs that link out to every platform build (mobile stores, extension
+    // stores). We link only these two owner-supplied URLs and never fabricate store links.
+    const val WEBSITE_ASTAGHFIRULLAH = "https://astaghfirullah.4fdev.com/"
+    const val WEBSITE_AFAPPS = "https://afapps.4fdev.com/"
 
     // Resources
     const val BLESSING_AUDIO_PATH = "/raw/mohmmed.wav"
@@ -96,7 +111,7 @@ object Constants {
 
     // Daily dhikr startup dialog
     /** Seconds the dialog stays up before dismissing itself. */
-    const val DAILY_DHIKR_COUNTDOWN_SECONDS = 5
+    const val DAILY_DHIKR_COUNTDOWN_SECONDS = 7
     /** Countdown tick interval; 1s so the label counts down in whole seconds. */
     const val DAILY_DHIKR_TICK_MS = 1000
     const val DEFAULT_DAILY_DHIKR_ENABLED = true

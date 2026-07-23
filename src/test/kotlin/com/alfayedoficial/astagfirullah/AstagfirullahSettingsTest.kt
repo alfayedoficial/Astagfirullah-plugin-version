@@ -586,47 +586,81 @@ class AstagfirullahSettingsTest {
         }
 
         @Test
-        @DisplayName("Shows on a fresh install, when no date has been recorded")
-        fun showsWhenNeverShown() {
-            assertEquals("", settings.lastDailyDhikrDate)
-            assertTrue(settings.shouldShowDailyDhikr("2026-07-22"))
-        }
-
-        @Test
-        @DisplayName("Does not show twice on the same day")
-        fun doesNotShowTwiceSameDay() {
-            settings.lastDailyDhikrDate = "2026-07-22"
-            assertFalse(settings.shouldShowDailyDhikr("2026-07-22"))
-        }
-
-        @Test
-        @DisplayName("Shows again the next day")
-        fun showsAgainNextDay() {
-            settings.lastDailyDhikrDate = "2026-07-22"
-            assertTrue(settings.shouldShowDailyDhikr("2026-07-23"))
-        }
-
-        @Test
-        @DisplayName("Never shows when the user disabled it, even on a new day")
-        fun neverShowsWhenDisabled() {
-            settings.dailyDhikrEnabled = false
-            settings.lastDailyDhikrDate = "2026-07-22"
-            assertFalse(settings.shouldShowDailyDhikr("2026-07-23"))
-            settings.lastDailyDhikrDate = ""
-            assertFalse(settings.shouldShowDailyDhikr("2026-07-23"))
-        }
-
-        @Test
-        @DisplayName("Daily dhikr fields survive serialization round-trip")
+        @DisplayName("Daily dhikr enabled flag survives serialization round-trip")
         fun survivesSerialization() {
             settings.dailyDhikrEnabled = false
-            settings.lastDailyDhikrDate = "2026-07-22"
-
             val restored = AstagfirullahSettings()
             XmlSerializerUtil.copyBean(settings.state, restored.state)
-
             assertFalse(restored.dailyDhikrEnabled)
-            assertEquals("2026-07-22", restored.lastDailyDhikrDate)
+        }
+    }
+
+    @Nested
+    @DisplayName("What's New Tests")
+    inner class WhatsNewTests {
+
+        @Test
+        @DisplayName("Shows on a fresh install, when no version has been recorded")
+        fun showsWhenNeverShown() {
+            assertEquals("", settings.lastWhatsNewVersion)
+            assertTrue(settings.shouldShowWhatsNew("3.0.0"))
+        }
+
+        @Test
+        @DisplayName("Does not show again for the same version")
+        fun doesNotShowSameVersion() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            assertFalse(settings.shouldShowWhatsNew("3.0.0"))
+        }
+
+        @Test
+        @DisplayName("Shows again after an upgrade to a new version")
+        fun showsAfterUpgrade() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            assertTrue(settings.shouldShowWhatsNew("3.1.0"))
+        }
+
+        @Test
+        @DisplayName("lastWhatsNewVersion survives serialization round-trip")
+        fun survivesSerialization() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            val restored = AstagfirullahSettings()
+            XmlSerializerUtil.copyBean(settings.state, restored.state)
+            assertEquals("3.0.0", restored.lastWhatsNewVersion)
+        }
+    }
+
+    @Nested
+    @DisplayName("Anonymous Telemetry Settings Tests")
+    inner class TelemetryTests {
+
+        @Test
+        @DisplayName("Anonymous stats are enabled by default")
+        fun enabledByDefault() {
+            assertTrue(settings.anonymousStatsEnabled)
+        }
+
+        @Test
+        @DisplayName("Device id is empty until first requested, then stable")
+        fun deviceIdLazyAndStable() {
+            assertEquals("", settings.telemetryDeviceId)
+            val first = settings.getOrCreateDeviceId()
+            assertTrue(first.isNotBlank())
+            assertEquals(first, settings.getOrCreateDeviceId())
+            assertEquals(first, settings.telemetryDeviceId)
+        }
+
+        @Test
+        @DisplayName("Pending count and device id survive serialization")
+        fun survivesSerialization() {
+            settings.anonymousStatsEnabled = false
+            settings.pendingStatsCount = 42
+            val id = settings.getOrCreateDeviceId()
+            val restored = AstagfirullahSettings()
+            XmlSerializerUtil.copyBean(settings.state, restored.state)
+            assertFalse(restored.anonymousStatsEnabled)
+            assertEquals(42, restored.pendingStatsCount)
+            assertEquals(id, restored.telemetryDeviceId)
         }
     }
 }

@@ -60,14 +60,31 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
         var ratingPrompted: Boolean = false,
         var firstSetupCompleted: Boolean = false,
         var lastRatingPromptTime: Long = 0L,
-        /** Whether the once-a-day dhikr dialog is shown when the IDE opens. */
+        /** Whether the dhikr dialog is shown every time a project opens. */
         var dailyDhikrEnabled: Boolean = Constants.DEFAULT_DAILY_DHIKR_ENABLED,
         /**
-         * ISO date (yyyy-MM-dd) the daily dhikr dialog last appeared, used to cap it at
-         * once per day. Stored as a string rather than an epoch so the comparison is a
-         * plain calendar-day check and cannot drift with timezone maths.
+         * The plugin version whose "What's New" screen the user has already seen. When it
+         * differs from the running version, the What's New dialog is shown once on the next
+         * IDE open. Empty means it has never been shown.
          */
-        var lastDailyDhikrDate: String = ""
+        var lastWhatsNewVersion: String = "",
+        /**
+         * Whether anonymous, aggregate usage statistics (a count of remembrance phrases
+         * displayed) may be sent. Default on; the user can opt out in Settings. No personal
+         * data is ever sent — only a random device id, a count, and the platform.
+         */
+        var anonymousStatsEnabled: Boolean = true,
+        /** Random per-install id for anonymous stats. Generated lazily; contains no PII. */
+        var telemetryDeviceId: String = "",
+        /** Phrases displayed but not yet acknowledged by the backend, carried across restarts. */
+        var pendingStatsCount: Int = 0,
+        /** Epoch millis of the last successful stats flush; 0 if never. */
+        var lastStatsFlushTime: Long = 0L,
+        /**
+         * Last "Total dhikr" figure fetched from the server, shown in Settings. Cached so it
+         * can be displayed offline; -1 means never fetched.
+         */
+        var cachedTotalDhikr: Long = -1L
     )
 
     override fun getState(): State = myState
@@ -118,19 +135,49 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
         get() = myState.dailyDhikrEnabled
         set(value) { myState.dailyDhikrEnabled = value }
 
-    var lastDailyDhikrDate: String
-        get() = myState.lastDailyDhikrDate
-        set(value) { myState.lastDailyDhikrDate = value }
+    var lastWhatsNewVersion: String
+        get() = myState.lastWhatsNewVersion
+        set(value) { myState.lastWhatsNewVersion = value }
+
+    var anonymousStatsEnabled: Boolean
+        get() = myState.anonymousStatsEnabled
+        set(value) { myState.anonymousStatsEnabled = value }
+
+    var telemetryDeviceId: String
+        get() = myState.telemetryDeviceId
+        set(value) { myState.telemetryDeviceId = value }
+
+    var pendingStatsCount: Int
+        get() = myState.pendingStatsCount
+        set(value) { myState.pendingStatsCount = value }
+
+    var lastStatsFlushTime: Long
+        get() = myState.lastStatsFlushTime
+        set(value) { myState.lastStatsFlushTime = value }
+
+    var cachedTotalDhikr: Long
+        get() = myState.cachedTotalDhikr
+        set(value) { myState.cachedTotalDhikr = value }
+
+    /** Returns the device id, generating and persisting one on first use. */
+    @Synchronized
+    fun getOrCreateDeviceId(): String {
+        if (myState.telemetryDeviceId.isBlank()) {
+            myState.telemetryDeviceId = java.util.UUID.randomUUID().toString()
+        }
+        return myState.telemetryDeviceId
+    }
 
     /**
-     * Whether the daily dhikr dialog should be shown for [today].
+     * Whether the "What's New" dialog should be shown for [currentVersion].
      *
-     * Caps the dialog at once per calendar day. IntelliJ fires a startup activity per
-     * OPENED PROJECT, so without this check a developer opening three projects in one
-     * morning would get three popups.
+     * True when the running version differs from the last version whose What's New the user
+     * saw. A fresh install is handled by the caller: [FirstRunSetupActivity] records the
+     * current version after the setup wizard so a new user never sees both the wizard and a
+     * What's New for the same version.
      */
-    fun shouldShowDailyDhikr(today: String): Boolean =
-        dailyDhikrEnabled && lastDailyDhikrDate != today
+    fun shouldShowWhatsNew(currentVersion: String): Boolean =
+        lastWhatsNewVersion != currentVersion
 
     /**
      * Checks if this is the first run of the plugin.

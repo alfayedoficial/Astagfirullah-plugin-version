@@ -51,6 +51,11 @@ class AstagfirullahConfigurable : Configurable {
     private lateinit var soundCheckBox: JCheckBox
     private lateinit var startupCheckBox: JCheckBox
     private lateinit var dailyDhikrCheckBox: JCheckBox
+    private lateinit var anonymousStatsCheckBox: JCheckBox
+
+    // "Total dhikr worldwide" display. Shows the cached value immediately and refreshes from
+    // the server each time Settings opens (falling back to the cached value when offline).
+    private val totalDhikrLabel = JBLabel()
 
     override fun getDisplayName(): String = Constants.PLUGIN_NAME
 
@@ -78,8 +83,32 @@ class AstagfirullahConfigurable : Configurable {
             add(tabbedPane!!, BorderLayout.CENTER)
         }
 
+        // Each time Settings opens: show the cached total immediately, then refresh from the
+        // server (falling back to the cached value when offline).
+        refreshTotalDhikr()
+
         return mainPanel!!
     }
+
+    /**
+     * Populates the "Total dhikr worldwide" label from the cached value, then fetches the
+     * latest in the background. On a network failure the cached value stays shown.
+     */
+    private fun refreshTotalDhikr() {
+        totalDhikrLabel.text = formatTotalDhikr(settings.cachedTotalDhikr)
+        com.intellij.openapi.application.ApplicationManager.getApplication().executeOnPooledThread {
+            val fresh = com.alfayedoficial.astagfirullah.data.telemetry.PraiseTelemetryService
+                .getInstance().fetchTotalDhikr()
+            if (fresh != null) {
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
+                    totalDhikrLabel.text = formatTotalDhikr(fresh)
+                }
+            }
+        }
+    }
+
+    private fun formatTotalDhikr(value: Long): String =
+        if (value < 0) "…" else "%,d".format(value)
 
     /**
      * Navigates to the Account tab (login).
@@ -185,10 +214,29 @@ class AstagfirullahConfigurable : Configurable {
 
         gbc.gridy = row++
         dailyDhikrCheckBox = JCheckBox(
-            "Show a daily dhikr window when the IDE opens (once a day, closes itself)",
+            "Show a dhikr window each time you open a project (closes itself)",
             settings.dailyDhikrEnabled,
         )
         panel.add(dailyDhikrCheckBox, gbc)
+
+        gbc.gridy = row++
+        anonymousStatsCheckBox = JCheckBox(
+            "Share anonymous usage counts to help improve the app (no personal data)",
+            settings.anonymousStatsEnabled,
+        )
+        panel.add(anonymousStatsCheckBox, gbc)
+
+        // Community section: the worldwide "Total dhikr" counter.
+        gbc.gridy = row++
+        gbc.insets = JBUI.insets(20, 0, 8, 0)
+        panel.add(createSectionHeader("Community"), gbc)
+
+        gbc.insets = JBUI.insets(8, 0)
+        gbc.gridy = row++
+        val totalRow = JPanel(FlowLayout(FlowLayout.LEFT, 6, 0))
+        totalRow.add(JBLabel("Total dhikr worldwide:"))
+        totalRow.add(totalDhikrLabel)
+        panel.add(totalRow, gbc)
 
         // Info panel
         gbc.gridy = row++
@@ -772,7 +820,8 @@ class AstagfirullahConfigurable : Configurable {
                 delayComboBox.selectedItem != settings.delaySeconds ||
                 soundCheckBox.isSelected != settings.soundEnabled ||
                 startupCheckBox.isSelected != settings.showOnStartup ||
-                dailyDhikrCheckBox.isSelected != settings.dailyDhikrEnabled
+                dailyDhikrCheckBox.isSelected != settings.dailyDhikrEnabled ||
+                anonymousStatsCheckBox.isSelected != settings.anonymousStatsEnabled
     }
 
     override fun apply() {
@@ -781,6 +830,7 @@ class AstagfirullahConfigurable : Configurable {
         settings.soundEnabled = soundCheckBox.isSelected
         settings.showOnStartup = startupCheckBox.isSelected
         settings.dailyDhikrEnabled = dailyDhikrCheckBox.isSelected
+        settings.anonymousStatsEnabled = anonymousStatsCheckBox.isSelected
     }
 
     override fun reset() {
@@ -789,5 +839,6 @@ class AstagfirullahConfigurable : Configurable {
         soundCheckBox.isSelected = settings.soundEnabled
         startupCheckBox.isSelected = settings.showOnStartup
         dailyDhikrCheckBox.isSelected = settings.dailyDhikrEnabled
+        anonymousStatsCheckBox.isSelected = settings.anonymousStatsEnabled
     }
 }
