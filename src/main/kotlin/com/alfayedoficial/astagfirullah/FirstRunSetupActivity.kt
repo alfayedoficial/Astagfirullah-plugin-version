@@ -1,6 +1,7 @@
 package com.alfayedoficial.astagfirullah
 
 import com.alfayedoficial.astagfirullah.core.Constants
+import com.alfayedoficial.astagfirullah.core.RuntimeEnv
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -21,6 +22,13 @@ class FirstRunSetupActivity : ProjectActivity {
     private val logger = Logger.getInstance(FirstRunSetupActivity::class.java)
 
     override suspend fun execute(project: Project) {
+        // Never pop the setup wizard or What's New in headless/test/integration-test runs — an
+        // auto-shown dialog stalls the Marketplace install-plugin-test (see RuntimeEnv).
+        if (RuntimeEnv.isNonInteractive()) {
+            logger.debug("Skipping first-run/what's-new: non-interactive environment")
+            return
+        }
+
         val settings = AstagfirullahSettings.getInstance()
 
         if (settings.isFirstRun()) {
