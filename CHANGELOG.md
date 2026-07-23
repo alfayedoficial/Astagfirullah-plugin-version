@@ -28,7 +28,8 @@ upgrading from 2.0.1 on the Marketplace, everything below is new to you.
   "What's New" screen, and on the Marketplace listing
 - **"What's New" screen** shown once when you open the IDE after upgrading to a new version
 - Daily dhikr window on IDE startup — a random remembrance phrase with a countdown that
-  closes itself after 5 seconds, at most once a day, non-modal, RTL for Arabic/Urdu/Farsi
+  with a rotating link to our other apps, closing itself after 7 seconds — shown every time
+  you open a project, non-modal, RTL for Arabic/Urdu/Farsi
 - Setting to turn the daily dhikr window off (Settings → Tools → Astagfirullah → Behavior)
 - Continuous integration: build, unit tests, and the JetBrains Plugin Verifier on every push
 
