@@ -31,11 +31,15 @@ class RatePromptActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         val settings = AstagfirullahSettings.getInstance()
 
-        // Record install time on first run
+        // Install time is recorded by the setup wizard when it completes or is skipped
+        // (FirstRunSetupDialog), never here. Recording it during the first project open would
+        // prematurely flip isFirstRun() to false — and since ProjectActivity order is not
+        // guaranteed, DailyDhikrActivity could then show its popup on top of the setup wizard
+        // (and FirstRunSetupActivity could even skip the wizard). Until the wizard has run and
+        // stamped installTime, hold off on the rating flow entirely.
         if (settings.installTime == 0L) {
-            settings.installTime = System.currentTimeMillis()
-            logger.debug("First plugin installation recorded")
-            return // Don't show rating on first install
+            logger.debug("Install time not yet recorded (setup wizard pending), skipping rating")
+            return
         }
 
         // Skip if user has completed the rating flow (already rated or dismissed permanently)
