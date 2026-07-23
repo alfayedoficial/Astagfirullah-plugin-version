@@ -1,5 +1,6 @@
 package com.alfayedoficial.astagfirullah
 
+import com.alfayedoficial.astagfirullah.core.RuntimeEnv
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -18,6 +19,12 @@ class DailyDhikrActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
         try {
+            // Stay silent in headless/test/integration-test runs (Marketplace install-plugin-test).
+            if (RuntimeEnv.isNonInteractive()) {
+                logger.debug("Skipping daily dhikr: non-interactive environment")
+                return
+            }
+
             val settings = AstagfirullahSettings.getInstance()
 
             // Never interrupt the very first run: the setup wizard owns that moment.

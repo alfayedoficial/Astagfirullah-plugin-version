@@ -64,6 +64,10 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
 
     init {
         title = "Astagfirullah Setup"
+        // Non-modal so it never blocks the EDT / IDE startup. A modal wizard auto-shown on
+        // project open stalled the Marketplace IDE-run verifier (10-minute timeout) and kept
+        // the IDE Trial widget from initializing. Non-modal also lets users keep working.
+        isModal = false
         init()
     }
 
@@ -114,7 +118,10 @@ class FirstRunSetupDialog(private val project: Project?) : DialogWrapper(project
         // Features list \u2014 sourced from the shared WhatsNew highlights so the wizard, the
         // About tab and the What's New dialog stay in sync.
         val featuresHtml = buildString {
-            append("<html><div style='text-align: left;'><b>What's New in ")
+            // A fixed width makes the HTML label wrap long highlight lines. Without it the label
+            // sizes to its widest line and, centered in the FlowLayout, overflows (and visibly
+            // clips) both edges of the 550px wizard panel.
+            append("<html><div style='width: 490px; text-align: left;'><b>What's New in ")
             append(Constants.PLUGIN_VERSION)
             append(":</b><br><br>")
             WhatsNew.HIGHLIGHTS.forEach { append("\u2022 ").append(it).append("<br><br>") }
