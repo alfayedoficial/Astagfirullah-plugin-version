@@ -22,6 +22,7 @@ object SettingsApiService {
      *
      * @return SettingsResult containing either the settings data or an error
      */
+    @JvmStatic
     fun fetchSettings(): SettingsResult {
         val urlString = "${Constants.API_BASE_URL}${Constants.API_SETTINGS_ENDPOINT}?app_type=${Constants.API_APP_TYPE}"
 
@@ -57,6 +58,7 @@ object SettingsApiService {
      * @param v2 Second version string (e.g., "2.1.0")
      * @return Positive if v1 > v2, negative if v1 < v2, 0 if equal
      */
+    @JvmStatic
     fun compareVersions(v1: String, v2: String): Int = VersionUtils.compareVersions(v1, v2)
 
     /**
@@ -67,6 +69,7 @@ object SettingsApiService {
      * @param serverVersion Latest version from server
      * @return true if server version is newer
      */
+    @JvmStatic
     fun isUpdateAvailable(currentVersion: String, serverVersion: String): Boolean =
         VersionUtils.isUpdateAvailable(currentVersion, serverVersion)
 }

@@ -67,7 +67,6 @@ class RatePromptActivityTest {
 
     private lateinit var closeable: AutoCloseable
     private lateinit var applicationManagerMock: MockedStatic<ApplicationManager>
-    private lateinit var settingsMock: MockedStatic<AstagfirullahSettings>
     private lateinit var notificationGroupManagerMock: MockedStatic<NotificationGroupManager>
 
     private lateinit var activity: RatePromptActivity
@@ -84,10 +83,10 @@ class RatePromptActivityTest {
         applicationManagerMock.`when`<Application> { ApplicationManager.getApplication() }
             .thenReturn(mockApplication)
 
-        // Setup AstagfirullahSettings mock
-        settingsMock = mockStatic(AstagfirullahSettings::class.java)
-        settingsMock.`when`<AstagfirullahSettings> { AstagfirullahSettings.getInstance() }
-            .thenReturn(mockSettings)
+        // AstagfirullahSettings.getInstance() is a companion call, so a static mock of the
+        // class never intercepts it; route it through Application.getService instead.
+        `when`(mockApplication.getService(AstagfirullahSettings::class.java)).thenReturn(mockSettings)
+        `when`(mockApplication.getService(NotificationGroupManager::class.java)).thenReturn(mockNotificationGroupManager)
 
         // Setup NotificationGroupManager mock
         notificationGroupManagerMock = mockStatic(NotificationGroupManager::class.java)
@@ -110,7 +109,6 @@ class RatePromptActivityTest {
     @AfterEach
     fun tearDown() {
         applicationManagerMock.close()
-        settingsMock.close()
         notificationGroupManagerMock.close()
         closeable.close()
     }
@@ -502,7 +500,7 @@ class RatePromptActivityTest {
             activity.execute(mockProject)
 
             // Then
-            settingsMock.verify { AstagfirullahSettings.getInstance() }
+            verify(mockApplication).getService(AstagfirullahSettings::class.java)
         }
 
         @Test
@@ -594,7 +592,7 @@ class RatePromptActivityTest {
         @DisplayName("Should continue if settings are temporarily unavailable")
         fun testSettingsTemporarilyUnavailable() = runTest {
             // Given
-            settingsMock.`when`<AstagfirullahSettings> { AstagfirullahSettings.getInstance() }
+            `when`(mockApplication.getService(AstagfirullahSettings::class.java))
                 .thenThrow(RuntimeException("Service unavailable"))
 
             // When/Then - should handle gracefully

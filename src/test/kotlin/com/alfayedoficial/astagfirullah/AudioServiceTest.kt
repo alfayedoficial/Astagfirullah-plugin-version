@@ -73,7 +73,9 @@ class AudioServiceTest {
         @DisplayName("Should stop previous audio before playing new audio")
         fun testPlayAudioStopsPreviousClip() {
             // Given
-            val firstClip = createMockClip()
+            // The first clip must still be playing: stopCurrentAudio() only calls stop() on a
+            // running clip (it always close()s), so a non-running mock never sees stop().
+            val firstClip = createMockClip(isRunning = true)
             val secondClip = createMockClip()
             audioService.setMockClip(firstClip)
             audioService.setMockInputStream(createMockAudioInputStream())

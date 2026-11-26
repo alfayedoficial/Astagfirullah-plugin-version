@@ -1,5 +1,6 @@
 package com.alfayedoficial.astagfirullah.data.sync
 
+import com.alfayedoficial.astagfirullah.TestApplication
 import com.alfayedoficial.astagfirullah.core.Constants
 import com.alfayedoficial.astagfirullah.data.api.ApiResult
 import com.alfayedoficial.astagfirullah.data.api.PraiseApiService
@@ -38,8 +39,7 @@ class PraiseSyncServiceTest {
     @Mock
     private lateinit var mockUpdateCacheService: PluginUpdateCacheService
 
-    private lateinit var mockedPraiseCacheStatic: MockedStatic<PraiseCacheService>
-    private lateinit var mockedUpdateCacheStatic: MockedStatic<PluginUpdateCacheService>
+    private lateinit var testApplication: TestApplication
     private lateinit var mockedSettingsApiStatic: MockedStatic<SettingsApiService>
     private lateinit var mockedPraiseApiStatic: MockedStatic<PraiseApiService>
 
@@ -52,15 +52,12 @@ class PraiseSyncServiceTest {
         closeable = MockitoAnnotations.openMocks(this)
 
         // Mock static getInstance() methods
-        mockedPraiseCacheStatic = mockStatic(PraiseCacheService::class.java)
-        mockedUpdateCacheStatic = mockStatic(PluginUpdateCacheService::class.java)
+        testApplication = TestApplication()
         mockedSettingsApiStatic = mockStatic(SettingsApiService::class.java)
         mockedPraiseApiStatic = mockStatic(PraiseApiService::class.java)
 
-        mockedPraiseCacheStatic.`when`<PraiseCacheService> { PraiseCacheService.getInstance() }
-            .thenReturn(mockPraiseCacheService)
-        mockedUpdateCacheStatic.`when`<PluginUpdateCacheService> { PluginUpdateCacheService.getInstance() }
-            .thenReturn(mockUpdateCacheService)
+        testApplication.register(PraiseCacheService::class.java, mockPraiseCacheService)
+        testApplication.register(PluginUpdateCacheService::class.java, mockUpdateCacheService)
 
         // Create a fresh instance for each test
         syncService = PraiseSyncService()
@@ -68,8 +65,8 @@ class PraiseSyncServiceTest {
 
     @AfterEach
     fun tearDown() {
-        mockedPraiseCacheStatic.close()
-        mockedUpdateCacheStatic.close()
+        syncService.dispose()
+        testApplication.close()
         mockedSettingsApiStatic.close()
         mockedPraiseApiStatic.close()
         closeable.close()

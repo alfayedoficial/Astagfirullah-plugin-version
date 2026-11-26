@@ -46,7 +46,6 @@ class FirstRunSetupActivityTest {
 
     private lateinit var closeable: AutoCloseable
     private lateinit var applicationManagerMock: MockedStatic<ApplicationManager>
-    private lateinit var settingsMock: MockedStatic<AstagfirullahSettings>
 
     private lateinit var activity: FirstRunSetupActivity
 
@@ -59,10 +58,9 @@ class FirstRunSetupActivityTest {
         applicationManagerMock.`when`<Application> { ApplicationManager.getApplication() }
             .thenReturn(mockApplication)
 
-        // Setup AstagfirullahSettings mock
-        settingsMock = mockStatic(AstagfirullahSettings::class.java)
-        settingsMock.`when`<AstagfirullahSettings> { AstagfirullahSettings.getInstance() }
-            .thenReturn(mockSettings)
+        // AstagfirullahSettings.getInstance() is a companion call, so a static mock of the
+        // class never intercepts it; route it through Application.getService instead.
+        `when`(mockApplication.getService(AstagfirullahSettings::class.java)).thenReturn(mockSettings)
 
         // Setup project mock
         `when`(mockProject.name).thenReturn("TestProject")
@@ -73,7 +71,6 @@ class FirstRunSetupActivityTest {
     @AfterEach
     fun tearDown() {
         applicationManagerMock.close()
-        settingsMock.close()
         closeable.close()
     }
 
@@ -239,7 +236,7 @@ class FirstRunSetupActivityTest {
             activity.execute(mockProject)
 
             // Then - settings should be retrieved
-            settingsMock.verify { AstagfirullahSettings.getInstance() }
+            verify(mockApplication).getService(AstagfirullahSettings::class.java)
         }
 
         @Test
@@ -259,7 +256,7 @@ class FirstRunSetupActivityTest {
         @DisplayName("Should handle null settings gracefully")
         fun testNullSettingsHandling() = runTest {
             // Given - settings returns null (edge case)
-            settingsMock.`when`<AstagfirullahSettings> { AstagfirullahSettings.getInstance() }
+            `when`(mockApplication.getService(AstagfirullahSettings::class.java))
                 .thenReturn(null)
 
             // When/Then - should handle gracefully
