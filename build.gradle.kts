@@ -44,6 +44,13 @@ dependencies {
       intellijIdea("2026.3") {
          useInstaller = false
       }
+      // 2026.3 split the Build tool window API (com.intellij.build.BuildViewManager,
+      // BuildProgressListener, BuildEvent) out of the core into its own content module,
+      // so it is no longer on the compile classpath by default ("Unresolved reference
+      // 'BuildViewManager'"). BuildProgressService / AppProjectActivity use it to show
+      // dhikr while a build runs. On 2024.2-2026.2 the same classes live in the core, so
+      // this only affects compilation against 2026.3 -- the verifier matrix proves both.
+      bundledModule("intellij.platform.buildView")
       // NOTE: testFramework(TestFrameworkType.Platform) is deliberately NOT declared.
       // These are plain JUnit unit tests, not BasePlatformTestCase tests. Adding the
       // platform test framework registers com.intellij.tests.JUnit5TestSessionListener,
