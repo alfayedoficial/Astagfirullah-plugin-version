@@ -158,7 +158,7 @@ class SettingsApiServiceTest {
             assertEquals(15, settings.praiseVersion)
             assertEquals(UpdateType.EMERGENCY, settings.updateType)
             assertEquals("https://plugins.jetbrains.com", settings.updateUrl)
-            assertTrue(settings.isActive)
+            assertEquals(true, settings.isActive)
         }
 
         @Test

@@ -26,7 +26,7 @@
 
 **Astagfirullah** is an IntelliJ IDEA plugin that displays beautiful Islamic remembrance phrases (Dhikr) during Gradle builds, project sync, and other waiting periods. Turn idle moments into opportunities for spiritual reflection with supplications, glorification, and blessings upon the Prophet Muhammad (peace be upon him).
 
-> **Supported IDEs:** IntelliJ 2024.2 through 2026.2 (build 242–262.*), every release verified by the JetBrains Plugin Verifier. On 2023.2–2024.1? Use version 2.0.1.
+> **Supported IDEs:** IntelliJ 2024.2 through 2026.3 (build 242–263.*), plus Android Studio on those platforms, every release verified by the JetBrains Plugin Verifier. On 2023.2–2024.1? Use version 2.0.1.
 
 ## Features
 
@@ -217,7 +217,7 @@ See [CHANGELOG](CHANGELOG.md) for version history.
 ### Latest: Version 3.0.0 — Everywhere You Are
 - **Quran audio player** — 200+ reciters, search any surah, play inside the IDE
 - **Dhikr window** every time you open a project (7s, self-closing, rotating promo)
-- **IntelliJ 2024.2 → 2026.2** support, verified across every release
+- **IntelliJ 2024.2 → 2026.3** support, verified across every release
 - Right-to-left rendering for Arabic, Urdu and Farsi
 - **"What's New"** screen on upgrade + a worldwide Total dhikr counter in Settings
 - Also on **Android, iOS and browser extensions**

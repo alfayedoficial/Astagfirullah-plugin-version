@@ -88,10 +88,38 @@ object LeaderboardApiService {
             append(Constants.API_LEADERBOARD_ENDPOINT)
             append("?app_type=${Constants.API_APP_TYPE}")
             append("&period=${period.apiValue}")
+            // /statistic/top-users ignores `period`; it only filters by start_date/end_date
+            // (defaulting to "since the start of last year"). Without these every tab --
+            // Today, This Week, This Month, All Time -- returned the same list.
+            val (start, end) = dateRange(period)
+            append("&start_date=$start")
+            append("&end_date=$end")
             append("&page=$page")
             append("&limit=$limit")
         }
     }
+
+    /**
+     * Maps a [LeaderboardPeriod] to the inclusive yyyy-MM-dd range the backend expects.
+     * Weeks start on Monday, matching Carbon::startOfWeek() used by the backend's own weekly stats.
+     */
+    internal fun dateRange(
+        period: LeaderboardPeriod,
+        today: java.time.LocalDate = java.time.LocalDate.now()
+    ): Pair<String, String> {
+        val start = when (period) {
+            LeaderboardPeriod.DAILY -> today
+            LeaderboardPeriod.WEEKLY -> today.with(
+                java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)
+            )
+            LeaderboardPeriod.MONTHLY -> today.withDayOfMonth(1)
+            LeaderboardPeriod.ALL_TIME -> ALL_TIME_START
+        }
+        return start.toString() to today.toString()
+    }
+
+    /** Fixed early start so "All Time" spans every year; the backend default is only the start of last year. */
+    private val ALL_TIME_START: java.time.LocalDate = java.time.LocalDate.of(2020, 1, 1)
 
     /**
      * Extracts the main error message from error response body.

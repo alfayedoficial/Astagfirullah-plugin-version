@@ -5,6 +5,30 @@ All notable changes to the Astagfirullah plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2026-11-26
+
+Hotfix: IntelliJ IDEA 2026.3 and Android Studio Stingray could not install 3.0.0, whose
+range stopped at 2026.2. Also re-syncs the plugin's API client with the production backend.
+
+### Changed
+- **Supported IDE range is now 2024.2 through 2026.3** (build 242–263.*), verified by the
+  Plugin Verifier on every release in the range
+- Builds against the unified IntelliJ IDEA 2026.3 distribution (Community and Ultimate
+  merged from 2025.3); IntelliJ Platform Gradle Plugin 2.20.1, Kotlin 2.4.21
+
+### Fixed
+- Plugin could not be installed on IntelliJ IDEA 2026.3 / Android Studio Stingray
+- Leaderboard periods were ignored: the backend filters `top-users` by `start_date` /
+  `end_date`, not `period`, so Today / This Week / This Month all returned the same list
+- Sign-ups from the plugin were stored as `platform=ANDROID`: the backend reads `platform`,
+  the plugin sent only `app_type`
+- Server validation errors (returned under `error`) were not parsed, so field messages
+  were lost on login / register
+- `SettingsData` declared `app_type` / `is_active` / `update_url` as required, but
+  production `/api/v2/settings` does not send them; they are now optional, and the
+  server's `app_details` release notes are read
+- `update_type: NONE` from the server is now respected: no update prompt is shown
+
 ## [3.0.0] - 2026-07-23
 
 Astagfirullah 3.0.0 is a major release that supersedes the never-published 2.1.0. If you are

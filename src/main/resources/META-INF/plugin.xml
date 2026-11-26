@@ -119,6 +119,15 @@ Settings &rarr; Tools &rarr; Astagfirullah.</p>
     ]]></description>
 
     <change-notes><![CDATA[
+<h3>Version 3.0.1 - IntelliJ 2026.3 &amp; Android Studio Stingray</h3>
+<ul>
+    <li><b>FIXED:</b> The plugin could not be installed on IntelliJ IDEA 2026.3 or Android Studio Stingray. It now supports 2024.2 through <b>2026.3</b>, verified by the Plugin Verifier</li>
+    <li><b>FIXED:</b> Leaderboard tabs (Today, This Week, This Month) all showed the same ranking</li>
+    <li><b>FIXED:</b> Accounts created from the plugin were recorded as Android sign-ups</li>
+    <li><b>FIXED:</b> Sign-up and login validation messages from the server were not shown</li>
+    <li><b>FIXED:</b> An update prompt could appear for a release the server marked as not needing one</li>
+</ul>
+
 <h3>Version 3.0.0 - Everywhere You Are</h3>
 <p><i>A major release: latest-IDE support, a daily moment of remembrance, and the whole Astagfirullah family in one place</i></p>
 <ul>
@@ -299,7 +308,7 @@ Settings &rarr; Tools &rarr; Astagfirullah.</p>
 
 
     <!-- Authoritative values are stamped by Gradle `patchPluginXml`; kept in sync here
-         so a reader of this file is not misled. 262 = IntelliJ 2026.2. -->
-    <idea-version since-build="242" until-build="262.*"/>
+         so a reader of this file is not misled. 263 = IntelliJ 2026.3. -->
+    <idea-version since-build="242" until-build="263.*"/>
 
 </idea-plugin>

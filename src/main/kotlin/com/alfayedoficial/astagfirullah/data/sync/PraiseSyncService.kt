@@ -8,6 +8,7 @@ import com.alfayedoficial.astagfirullah.data.api.SettingsResult
 import com.alfayedoficial.astagfirullah.data.cache.PluginUpdateCacheService
 import com.alfayedoficial.astagfirullah.data.cache.PraiseCacheService
 import com.alfayedoficial.astagfirullah.data.model.SettingsData
+import com.alfayedoficial.astagfirullah.data.model.UpdateType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
@@ -170,7 +171,12 @@ class PraiseSyncService {
         val currentVersion = Constants.PLUGIN_VERSION
         val serverVersion = settings.versionName
 
-        if (SettingsApiService.isUpdateAvailable(currentVersion, serverVersion)) {
+        // update_type NONE means the backend does not want users prompted for this release
+        // (production currently returns NONE for JETBRAINS_PLUGIN). Previously any newer
+        // version_name triggered a notification regardless of update_type.
+        val promptRequested = !settings.updateType.equals(UpdateType.NONE, ignoreCase = true)
+
+        if (promptRequested && SettingsApiService.isUpdateAvailable(currentVersion, serverVersion)) {
             logger.debug("Plugin update available: $currentVersion -> $serverVersion")
 
             // Only notify if not already shown and not dismissed

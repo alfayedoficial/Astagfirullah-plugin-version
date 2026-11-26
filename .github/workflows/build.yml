@@ -1,6 +1,6 @@
 name: Build & Verify
 
-# The plugin declares compatibility from build 242 (IntelliJ 2024.2) up to 262.* (2026.2).
+# The plugin declares compatibility from build 242 (IntelliJ 2024.2) up to 263.* (2026.3).
 # That range is only a CLAIM until the JetBrains Plugin Verifier proves it, so this
 # workflow is the gate: nothing ships on an unverified compatibility range.
 
@@ -85,7 +85,8 @@ jobs:
           - '2025.2'
           - '2025.3'
           - '2026.1'
-          - '2026.2' # untilBuild ceiling (262)
+          - '2026.2'
+          - '2026.3' # untilBuild ceiling (263)
     steps:
       - uses: actions/checkout@v4
 

@@ -823,7 +823,7 @@ class ApiModelsTest {
             assertEquals(10, settings.praiseVersion)
             assertEquals(UpdateType.NORMAL, settings.updateType)
             assertEquals("https://example.com/update", settings.updateUrl)
-            assertTrue(settings.isActive)
+            assertEquals(true, settings.isActive)
         }
 
         @Test
@@ -906,7 +906,7 @@ class ApiModelsTest {
 
             val settings = gson.fromJson(json, SettingsData::class.java)
 
-            assertFalse(settings.isActive)
+            assertEquals(false, settings.isActive)
         }
 
         @Test
