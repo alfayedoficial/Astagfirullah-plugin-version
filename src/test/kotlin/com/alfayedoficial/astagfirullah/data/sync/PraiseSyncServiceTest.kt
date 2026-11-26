@@ -18,6 +18,7 @@ import org.mockito.MockedStatic
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import java.util.concurrent.CountDownLatch
@@ -665,7 +666,8 @@ class PraiseSyncServiceTest {
             // Then: Should return error but update cache should still be updated
             assertTrue(result is PraiseSyncService.SyncResult.Error)
             assertEquals("Praise API timeout", (result as PraiseSyncService.SyncResult.Error).message)
-            verify(mockUpdateCacheService).updateCache(any(), any(), any(), any(), any())
+            // anyOrNull(): updateUrl is nullable, and any() type-checks each argument.
+            verify(mockUpdateCacheService).updateCache(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
         }
 
         @Test

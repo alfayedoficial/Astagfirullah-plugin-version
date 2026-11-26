@@ -39,16 +39,10 @@ jobs:
       - name: Build plugin
         run: ./gradlew buildPlugin --stacktrace
 
-      # NON-BLOCKING, deliberately and temporarily.
-      # 108 of 753 tests already fail on the branch point (4a7461f) -- verified in an
-      # isolated worktree -- because this repo has never had CI to catch the rot.
-      # Hard-failing here would make the pipeline permanently red on day one and, worse,
-      # would skip the Plugin Verifier below, which is the job that actually proves the
-      # declared 232->262 compatibility range.
-      # Results are still uploaded and visible. Remove continue-on-error once the 108
-      # pre-existing failures are triaged -- do NOT let this become the permanent state.
-      - name: Unit tests (non-blocking until pre-existing failures are triaged)
-        continue-on-error: true
+      # Blocking. The 108 pre-existing failures this step used to tolerate were triaged
+      # and fixed in 3.0.1 (almost all were static mocks that never intercepted Kotlin
+      # companion getInstance() calls), so a red test now means a real regression.
+      - name: Unit tests
         run: ./gradlew test --stacktrace
 
       - name: Upload test report

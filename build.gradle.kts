@@ -200,7 +200,12 @@ intellijPlatform {
          )
          versions.forEach { version ->
             if (version.startsWith("AI-")) {
-               create(IntelliJPlatformType.AndroidStudio, version.removePrefix("AI-"))
+               // Android Studio is published only as installers (no Maven coordinates), so
+               // it must resolve through the installer even though the build target above
+               // uses useInstaller = false.
+               create(IntelliJPlatformType.AndroidStudio, version.removePrefix("AI-")) {
+                  useInstaller = true
+               }
                return@forEach
             }
             // 2026.3+ is published only as the unified IntelliJ IDEA distribution; the
