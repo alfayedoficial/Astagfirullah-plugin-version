@@ -61,6 +61,8 @@ class PraiseSyncServiceTest {
 
         // Create a fresh instance for each test
         syncService = PraiseSyncService()
+        // Keep the sync on the test thread: Mockito static mocks are thread-local.
+        syncService.ioDispatcher = kotlinx.coroutines.Dispatchers.Unconfined
     }
 
     @AfterEach
@@ -244,11 +246,16 @@ class PraiseSyncServiceTest {
             whenever(mockUpdateCacheService.needsUpdateCheck()).thenReturn(false)
             whenever(mockPraiseCacheService.getCurrentVersion()).thenReturn(1)
 
+            // A second sync attempted WHILE the first is mid-flight (inside its settings
+            // fetch) must be turned away. Done re-entrantly on the test thread rather than
+            // from two threads: Mockito static mocks are thread-local, so on a second thread
+            // the mocked Application/API objects vanished and the test could never pass.
             val settingsData = createSettingsData(praiseVersion = 2, versionName = "2.0.0")
+            var secondResult: PraiseSyncService.SyncResult? = null
             mockedSettingsApiStatic.`when`<SettingsResult> { SettingsApiService.fetchSettings() }
                 .thenAnswer {
-                    // Simulate slow network call
-                    Thread.sleep(100)
+                    assertTrue(syncService.isSyncInProgress())
+                    secondResult = kotlinx.coroutines.runBlocking { syncService.syncIfNeeded() }
                     SettingsResult.Success(settingsData)
                 }
 
@@ -260,37 +267,13 @@ class PraiseSyncServiceTest {
 
             setupUpdateCheckMocks(settingsData, isUpdateAvailable = false)
 
-            val syncCount = AtomicInteger(0)
-            val latch = CountDownLatch(2)
+            // When
+            val firstResult = syncService.syncIfNeeded()
 
-            // When: Two concurrent sync attempts
-            thread {
-                kotlinx.coroutines.runBlocking {
-                    val result = syncService.syncIfNeeded()
-                    if (result is PraiseSyncService.SyncResult.Success) {
-                        syncCount.incrementAndGet()
-                    }
-                    latch.countDown()
-                }
-            }
-
-            Thread.sleep(10) // Ensure first thread starts first
-
-            thread {
-                kotlinx.coroutines.runBlocking {
-                    val result = syncService.syncIfNeeded()
-                    // Second call should get AlreadyUpToDate because sync is in progress
-                    if (result is PraiseSyncService.SyncResult.AlreadyUpToDate) {
-                        syncCount.incrementAndGet()
-                    }
-                    latch.countDown()
-                }
-            }
-
-            latch.await(5, TimeUnit.SECONDS)
-
-            // Then: Both should complete but only one should trigger actual sync
-            assertEquals(2, syncCount.get())
+            // Then: the first sync did the work, the overlapping one was turned away
+            assertTrue(firstResult is PraiseSyncService.SyncResult.Success, "first: $firstResult")
+            assertTrue(secondResult is PraiseSyncService.SyncResult.AlreadyUpToDate, "second: $secondResult")
+            mockedSettingsApiStatic.verify({ SettingsApiService.fetchSettings() }, times(1))
         }
 
         @Test

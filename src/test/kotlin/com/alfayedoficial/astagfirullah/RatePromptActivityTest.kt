@@ -117,17 +117,13 @@ class RatePromptActivityTest {
      * Reset the static notificationShownThisSession flag to ensure test isolation.
      */
     private fun resetNotificationShownFlag() {
-        try {
-            val companionField = RatePromptActivity::class.java.getDeclaredField("Companion")
-            companionField.isAccessible = true
-            val companion = companionField.get(null)
-
-            val flagField = companion.javaClass.getDeclaredField("notificationShownThisSession")
-            flagField.isAccessible = true
-            flagField.setBoolean(companion, false)
-        } catch (e: Exception) {
-            // Field access may vary, ignore if not accessible
-        }
+        // A companion-object property's backing field is a private STATIC field of the outer
+        // class, not a field of the Companion instance. The old lookup on the Companion threw,
+        // was swallowed, and the flag stayed true after the first test that showed the prompt,
+        // so every later "should show" test failed depending on execution order.
+        val flagField = RatePromptActivity::class.java.getDeclaredField("notificationShownThisSession")
+        flagField.isAccessible = true
+        flagField.setBoolean(null, false)
     }
 
     @Nested

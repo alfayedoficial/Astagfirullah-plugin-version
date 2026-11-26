@@ -13,6 +13,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -50,6 +51,13 @@ class PraiseSyncService : Disposable {
     override fun dispose() {
         coroutineScope.cancel()
     }
+
+    /**
+     * Dispatcher for the blocking HTTP calls. Tests swap in Dispatchers.Unconfined: Mockito
+     * static mocks are thread-local, so on an IO thread the mocked API objects were bypassed
+     * and the tests silently hit the real production API.
+     */
+    internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     // Callback for plugin update notifications
     var onUpdateAvailable: ((UpdateInfo) -> Unit)? = null
@@ -131,7 +139,7 @@ class PraiseSyncService : Disposable {
         updateCacheService: PluginUpdateCacheService,
         forceSync: Boolean
     ): SyncResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             logger.debug("Starting sync...")
 
             // Step 1: Fetch settings from server

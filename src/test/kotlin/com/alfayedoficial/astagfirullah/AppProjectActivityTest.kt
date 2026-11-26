@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
+import org.mockito.kotlin.any
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
@@ -93,7 +93,7 @@ class AppProjectActivityTest {
         // Setup project mocks
         `when`(mockProject.name).thenReturn("TestProject")
         `when`(mockProject.messageBus).thenReturn(mockMessageBus)
-        `when`(mockMessageBus.connect(any(com.intellij.openapi.Disposable::class.java))).thenReturn(mockMessageBusConnection)
+        `when`(mockMessageBus.connect(any<com.intellij.openapi.Disposable>())).thenReturn(mockMessageBusConnection)
 
         // Setup service mocks via project.service extension simulation
         `when`(mockProject.getService(BuildViewManager::class.java)).thenReturn(mockBuildViewManager)
@@ -122,7 +122,7 @@ class AppProjectActivityTest {
             activity.execute(mockProject)
 
             // Then - verify build listener was added
-            verify(mockBuildViewManager).addListener(any(BuildProgressService::class.java), any())
+            verify(mockBuildViewManager).addListener(any<BuildProgressService>(), any())
         }
 
         @Test
@@ -148,7 +148,7 @@ class AppProjectActivityTest {
             activity.execute(mockProject)
 
             // Then
-            verify(mockProject.messageBus).connect(any(com.intellij.openapi.Disposable::class.java))
+            verify(mockProject.messageBus).connect(any<com.intellij.openapi.Disposable>())
             verify(mockMessageBusConnection).subscribe(any(), any())
         }
     }
@@ -167,7 +167,7 @@ class AppProjectActivityTest {
             activity.execute(mockProject)
 
             // Then
-            verify(mockBuildViewManager).addListener(any(BuildProgressService::class.java), any())
+            verify(mockBuildViewManager).addListener(any<BuildProgressService>(), any())
         }
 
         @Test

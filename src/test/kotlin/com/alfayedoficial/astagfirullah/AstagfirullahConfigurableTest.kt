@@ -571,7 +571,9 @@ class AstagfirullahConfigurableTest {
             // Based on source: JBLabel(Constants.PLUGIN_VERSION)
             val version = Constants.PLUGIN_VERSION
 
-            assertEquals("2.0.0", version, "Should display current version")
+            // Was hardcoded "2.0.0" and went stale. The value is stamped from project.version
+            // at build time, so assert it is a real semantic version rather than a literal.
+            assertTrue(Regex("""\d+\.\d+\.\d+""").matches(version), "Should display current version, got '$version'")
         }
 
         @Test
