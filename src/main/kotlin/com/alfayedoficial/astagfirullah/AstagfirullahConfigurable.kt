@@ -770,13 +770,13 @@ class AstagfirullahConfigurable : Configurable {
         // A coroutine launch, not Thread { runBlocking { } }: compiled against 2026.3,
         // runBlocking binds to the IDE's forked BuildersKt.runBlockingK, which does not exist
         // on 2024.2-2026.2 and would throw NoSuchMethodError there (Plugin Verifier finding).
-        // Same pattern AppProjectActivity already uses for its startup sync.
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+        // Runs in the sync service's own scope, cancelled if the plugin is unloaded.
+        val syncService = PraiseSyncService.getInstance()
+        syncService.coroutineScope.launch {
             var resultText = ""
             var isSuccess = false
 
             try {
-                val syncService = PraiseSyncService.getInstance()
                 val result = syncService.forceSync()
 
                 when (result) {

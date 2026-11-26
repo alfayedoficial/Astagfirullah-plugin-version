@@ -621,6 +621,20 @@ class AstagfirullahSettingsTest {
         }
 
         @Test
+        @DisplayName("Does not show again for a patch release")
+        fun doesNotShowForPatch() {
+            settings.lastWhatsNewVersion = "3.0.0"
+            assertFalse(settings.shouldShowWhatsNew("3.0.1"))
+        }
+
+        @Test
+        @DisplayName("Shows after a major upgrade from an older line")
+        fun showsAfterMajorUpgrade() {
+            settings.lastWhatsNewVersion = "2.0.1"
+            assertTrue(settings.shouldShowWhatsNew("3.0.1"))
+        }
+
+        @Test
         @DisplayName("lastWhatsNewVersion survives serialization round-trip")
         fun survivesSerialization() {
             settings.lastWhatsNewVersion = "3.0.0"

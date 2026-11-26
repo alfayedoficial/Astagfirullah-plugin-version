@@ -9,10 +9,14 @@ import com.alfayedoficial.astagfirullah.data.cache.PluginUpdateCacheService
 import com.alfayedoficial.astagfirullah.data.cache.PraiseCacheService
 import com.alfayedoficial.astagfirullah.data.model.SettingsData
 import com.alfayedoficial.astagfirullah.data.model.UpdateType
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -27,10 +31,25 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 4. Check for plugin updates and cache the result
  */
 @Service(Service.Level.APP)
-class PraiseSyncService {
+class PraiseSyncService : Disposable {
 
     private val logger = Logger.getInstance(PraiseSyncService::class.java)
     private val isSyncing = AtomicBoolean(false)
+
+    /**
+     * Scope for background syncs, owned by this service and cancelled in [dispose] (IDE
+     * shutdown or dynamic plugin unload). Callers used to create a fresh
+     * `CoroutineScope(Dispatchers.IO)` per call, which nothing ever cancelled, so a sync in
+     * flight could outlive the plugin and keep its classloader alive.
+     *
+     * Owned here rather than constructor-injected so the service keeps its no-arg
+     * constructor, which the unit tests instantiate directly.
+     */
+    val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun dispose() {
+        coroutineScope.cancel()
+    }
 
     // Callback for plugin update notifications
     var onUpdateAvailable: ((UpdateInfo) -> Unit)? = null

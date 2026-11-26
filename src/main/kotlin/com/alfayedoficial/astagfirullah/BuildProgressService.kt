@@ -6,6 +6,7 @@ import com.alfayedoficial.astagfirullah.core.Constants
 import com.alfayedoficial.astagfirullah.data.api.StatisticApiService
 import com.intellij.build.BuildProgressListener
 import com.intellij.build.events.BuildEvent
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
@@ -23,7 +24,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Enhanced to show progress prominently in the status bar.
  */
 @Service(Service.Level.PROJECT)
-class BuildProgressService(private val project: Project) : BuildProgressListener {
+class BuildProgressService(private val project: Project) : BuildProgressListener, Disposable {
+
+    /** Parent for this project's build listener and message-bus connection. */
+    override fun dispose() = Unit
 
     private val logger = Logger.getInstance(BuildProgressService::class.java)
 

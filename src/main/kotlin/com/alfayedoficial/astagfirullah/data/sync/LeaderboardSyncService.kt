@@ -181,8 +181,10 @@ class LeaderboardSyncService {
     fun fetchMiniLeaderboard(forceRefresh: Boolean = false): FetchResult {
         val cache = LeaderboardCacheService.getInstance()
 
-        // For mini leaderboard, we can use full cache if available
-        if (!forceRefresh && !cache.needsRefresh()) {
+        // Reuse the cache only when it holds the All Time list. The full leaderboard writes
+        // whichever period the user last picked into the same cache, so without this check
+        // the "All Time" mini list could show "Today"'s ranking.
+        if (!forceRefresh && !cache.needsRefresh() && cache.getLastPeriod() == LeaderboardPeriod.ALL_TIME) {
             val cachedEntries = cache.getCachedEntries().take(5)
             if (cachedEntries.isNotEmpty()) {
                 return FetchResult.Success(

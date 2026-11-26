@@ -87,6 +87,7 @@ jobs:
           - '2026.1'
           - '2026.2'
           - '2026.3' # untilBuild ceiling (263)
+          - 'AI-2026.2.2.11' # Android Studio Rabbit 2 Patch 3 (stable)
     steps:
       - uses: actions/checkout@v4
 

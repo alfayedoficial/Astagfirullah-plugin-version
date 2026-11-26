@@ -194,8 +194,15 @@ intellijPlatform {
             "2026.1",
             "2026.2",
             "2026.3", // untilBuild ceiling (263)
+            // Android Studio is where most user reports come from, and it lags IntelliJ
+            // and patches the platform, so verify it directly: "AI-<Android Studio version>".
+            "AI-2026.2.2.11", // Android Studio Rabbit 2 Patch 3 (current stable)
          )
          versions.forEach { version ->
+            if (version.startsWith("AI-")) {
+               create(IntelliJPlatformType.AndroidStudio, version.removePrefix("AI-"))
+               return@forEach
+            }
             // 2026.3+ is published only as the unified IntelliJ IDEA distribution; the
             // older releases stay on IC, exactly as they were verified for 3.0.0.
             val (year, release) = version.split('.').map(String::toInt)
