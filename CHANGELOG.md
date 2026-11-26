@@ -28,6 +28,17 @@ range stopped at 2026.2. Also re-syncs the plugin's API client with the producti
   production `/api/v2/settings` does not send them; they are now optional, and the
   server's `app_details` release notes are read
 - `update_type: NONE` from the server is now respected: no update prompt is shown
+- Crash on 2024.2–2026.2 avoided: built against 2026.3, `runBlocking` linked to a
+  coroutines method only 2026.3 has (caught by the Plugin Verifier)
+- Leaderboard no longer requests for guests (endpoint is auth-only), applies `limit`
+  client-side (backend ignores it), and the mini list no longer reuses another period's cache
+- What's New is no longer re-shown for patch releases
+- Build listener and message-bus connection were never disposed on project close
+- Background syncs now run in a scope owned by the sync service and cancelled on unload
+
+### Internal
+- Android Studio Rabbit 2 (2026.2.2.11) added to the Plugin Verifier matrix
+- All unit tests pass (108 long-standing failures fixed); the test step is now blocking
 
 ## [3.0.0] - 2026-07-23
 

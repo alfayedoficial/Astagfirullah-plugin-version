@@ -126,6 +126,8 @@ Settings &rarr; Tools &rarr; Astagfirullah.</p>
     <li><b>FIXED:</b> Accounts created from the plugin were recorded as Android sign-ups</li>
     <li><b>FIXED:</b> Sign-up and login validation messages from the server were not shown</li>
     <li><b>FIXED:</b> An update prompt could appear for a release the server marked as not needing one</li>
+    <li><b>FIXED:</b> The leaderboard no longer errors for signed-out users; it asks you to sign in</li>
+    <li><b>IMPROVED:</b> "What's New" is no longer shown again for small bug-fix updates</li>
 </ul>
 
 <h3>Version 3.0.0 - Everywhere You Are</h3>
