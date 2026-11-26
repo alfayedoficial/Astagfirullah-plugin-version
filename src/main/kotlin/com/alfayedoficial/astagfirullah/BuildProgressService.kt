@@ -15,10 +15,6 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.WindowManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -71,48 +67,48 @@ class BuildProgressService(private val project: Project) : BuildProgressListener
         val task = object : Task.Backgroundable(project, selectTranslateTitle(), true) {
             override fun run(indicator: ProgressIndicator) {
                 try {
-                    runBlocking {
-                        withContext(Dispatchers.Default) {
-                            val settings = AstagfirullahSettings.getInstance()
-                            val phrases = selectedTranslatePhrases()
+                    val settings = AstagfirullahSettings.getInstance()
+                    val phrases = selectedTranslatePhrases()
 
-                            val delayMs = if (maxDurationSeconds > 0) {
-                                (maxDurationSeconds * 1000L) / phrases.size
-                            } else {
-                                settings.getDelayMillis()
-                            }
+                    val delayMs = if (maxDurationSeconds > 0) {
+                        (maxDurationSeconds * 1000L) / phrases.size
+                    } else {
+                        settings.getDelayMillis()
+                    }
 
-                            // Play sound at the start
-                            AudioService.getInstance().playBlessingSound()
+                    // Play sound at the start
+                    AudioService.getInstance().playBlessingSound()
 
-                            // Display phrases with progress - enhanced visibility
-                            for (i in phrases.indices) {
-                                // Main text shows the phrase prominently
-                                indicator.text = phrases[i]
-                                // Secondary text shows progress count
-                                indicator.text2 = "${i + 1} / ${phrases.size}"
-                                indicator.fraction = (i + 1) / phrases.size.toDouble()
+                    // Display phrases with progress - enhanced visibility
+                    for (i in phrases.indices) {
+                        // Main text shows the phrase prominently
+                        indicator.text = phrases[i]
+                        // Secondary text shows progress count
+                        indicator.text2 = "${i + 1} / ${phrases.size}"
+                        indicator.fraction = (i + 1) / phrases.size.toDouble()
 
-                                // Update status bar info text
-                                updateStatusBarText(phrases[i])
+                        // Update status bar info text
+                        updateStatusBarText(phrases[i])
 
-                                delay(delayMs)
-                            }
+                        // Plain sleep on this progress thread, not runBlocking { delay() }: compiled
+                        // against 2026.3, runBlocking binds to the IDE's forked
+                        // BuildersKt.runBlockingK, which does not exist on 2024.2-2026.2 and
+                        // would throw NoSuchMethodError there (caught by the Plugin Verifier).
+                        Thread.sleep(delayMs)
+                    }
 
-                            // Clear status bar text when done
-                            updateStatusBarText(null)
+                    // Clear status bar text when done
+                    updateStatusBarText(null)
 
-                            // Record statistics locally
-                            StatisticsService.getInstance().recordPhrasesDisplayed(
-                                count = phrases.size,
-                                language = settings.language
-                            )
+                    // Record statistics locally
+                    StatisticsService.getInstance().recordPhrasesDisplayed(
+                        count = phrases.size,
+                        language = settings.language
+                    )
 
-                            // Send statistics to API (in background)
-                            ApplicationManager.getApplication().executeOnPooledThread {
-                                StatisticApiService.sendStatistic(phrases.size)
-                            }
-                        }
+                    // Send statistics to API (in background)
+                    ApplicationManager.getApplication().executeOnPooledThread {
+                        StatisticApiService.sendStatistic(phrases.size)
                     }
                 } catch (e: Exception) {
                     logger.error("Error displaying phrases", e)
