@@ -16,7 +16,7 @@ object Constants {
      * Fallback used only when the plugin descriptor is unavailable (e.g. plain unit tests
      * with no running IntelliJ Platform). Never read this directly — use [PLUGIN_VERSION].
      */
-    private const val FALLBACK_VERSION = "3.0.0"
+    private const val FALLBACK_VERSION = "3.0.1"
 
     /**
      * The running plugin's version, read from the plugin descriptor that Gradle's
