@@ -3,6 +3,7 @@ package com.alfayedoficial.astagfirullah
 import com.alfayedoficial.astagfirullah.data.sync.PraiseSyncService
 import com.intellij.ProjectTopics
 import com.intellij.build.BuildViewManager
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -10,10 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootEvent
 import com.intellij.openapi.roots.ModuleRootListener
 import com.intellij.openapi.startup.ProjectActivity
-import com.intellij.openapi.util.Disposer
 import com.intellij.util.messages.MessageBusConnection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -27,7 +25,10 @@ class AppProjectActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         val buildViewManager = project.service<BuildViewManager>()
         val buildProgressService = project.service<BuildProgressService>()
-        val disposable = Disposer.newDisposable()
+        // Parent the listeners to the project-level service so they go away when the
+        // project closes. A bare Disposer.newDisposable() was never disposed, so every
+        // project open leaked a build listener and a message-bus connection.
+        val disposable: Disposable = buildProgressService
 
         // Register build listener
         buildViewManager.addListener(buildProgressService, disposable)
@@ -57,9 +58,9 @@ class AppProjectActivity : ProjectActivity {
      * Uses version-based sync to minimize network requests.
      */
     private fun syncAndCheckUpdates(project: Project) {
-        CoroutineScope(Dispatchers.IO).launch {
+        val syncService = PraiseSyncService.getInstance()
+        syncService.coroutineScope.launch {
             try {
-                val syncService = PraiseSyncService.getInstance()
 
                 // Set up callback for update notifications
                 syncService.onUpdateAvailable = { updateInfo ->

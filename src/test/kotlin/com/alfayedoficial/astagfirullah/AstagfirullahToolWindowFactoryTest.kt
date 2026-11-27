@@ -179,12 +179,18 @@ class AstagfirullahToolWindowFactoryTest {
         @Test
         @DisplayName("Factory does not require init or dispose methods")
         fun factoryDoesNotRequireLifecycleMethods() {
-            // IntelliJ factories typically don't need explicit lifecycle management
+            // IntelliJ factories typically don't need explicit lifecycle management.
+            //
+            // This used to assert there was no declared method named "init". That checks the
+            // compiler, not the factory: built against 2026.3, Kotlin emits a bridge for
+            // ToolWindowFactory's default init(ToolWindow), so the name appears even though
+            // the factory overrides nothing. The factory owns no resources, so the
+            // meaningful check is that it is not Disposable and declares no dispose().
             val methods = factory::class.java.declaredMethods.map { it.name }
-
-            // init and dispose are optional, factory should work without them
-            assertFalse(methods.contains("init"),
-                "Factory should not require explicit init")
+            assertFalse(factory is com.intellij.openapi.Disposable,
+                "Factory should not need disposing")
+            assertFalse(methods.contains("dispose"),
+                "Factory should not require explicit dispose")
         }
     }
 }

@@ -1,13 +1,15 @@
 package com.alfayedoficial.astagfirullah
 
 import com.alfayedoficial.astagfirullah.data.sync.PraiseSyncService
+import com.alfayedoficial.astagfirullah.data.telemetry.PraiseTelemetryService
 import com.intellij.build.BuildViewManager
 import com.intellij.openapi.application.Application
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Disposer
 import com.intellij.util.messages.MessageBus
 import com.intellij.util.messages.MessageBusConnection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
@@ -15,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
+import org.mockito.kotlin.any
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
@@ -67,9 +69,6 @@ class AppProjectActivityTest {
 
     private lateinit var closeable: AutoCloseable
     private lateinit var applicationManagerMock: MockedStatic<ApplicationManager>
-    private lateinit var praiseSyncServiceMock: MockedStatic<PraiseSyncService>
-    private lateinit var updateNotificationServiceMock: MockedStatic<UpdateNotificationService>
-    private lateinit var disposerMock: MockedStatic<Disposer>
 
     private lateinit var activity: AppProjectActivity
 
@@ -82,25 +81,19 @@ class AppProjectActivityTest {
         applicationManagerMock.`when`<Application> { ApplicationManager.getApplication() }
             .thenReturn(mockApplication)
 
-        // Setup PraiseSyncService mock
-        praiseSyncServiceMock = mockStatic(PraiseSyncService::class.java)
-        praiseSyncServiceMock.`when`<PraiseSyncService> { PraiseSyncService.getInstance() }
-            .thenReturn(mockPraiseSyncService)
-
-        // Setup UpdateNotificationService mock
-        updateNotificationServiceMock = mockStatic(UpdateNotificationService::class.java)
-        updateNotificationServiceMock.`when`<UpdateNotificationService> { UpdateNotificationService.getInstance() }
-            .thenReturn(mockUpdateNotificationService)
-
-        // Setup Disposer mock
-        disposerMock = mockStatic(Disposer::class.java)
-        disposerMock.`when`<Any> { Disposer.newDisposable() }
-            .thenReturn(mock())
+        // Application services resolve through Application.getService. Static-mocking each
+        // service's companion getInstance() never intercepted the Kotlin call (it is an
+        // instance call on the Companion), which is why this class used to fail in setUp.
+        `when`(mockApplication.getService(PraiseSyncService::class.java)).thenReturn(mockPraiseSyncService)
+        `when`(mockApplication.getService(UpdateNotificationService::class.java)).thenReturn(mockUpdateNotificationService)
+        `when`(mockApplication.getService(PraiseTelemetryService::class.java)).thenReturn(mock<PraiseTelemetryService>())
+        // Run the background sync inline so tests observe it deterministically.
+        `when`(mockPraiseSyncService.coroutineScope).thenReturn(CoroutineScope(Dispatchers.Unconfined))
 
         // Setup project mocks
         `when`(mockProject.name).thenReturn("TestProject")
         `when`(mockProject.messageBus).thenReturn(mockMessageBus)
-        `when`(mockMessageBus.connect(any(com.intellij.openapi.Disposable::class.java))).thenReturn(mockMessageBusConnection)
+        `when`(mockMessageBus.connect(any<com.intellij.openapi.Disposable>())).thenReturn(mockMessageBusConnection)
 
         // Setup service mocks via project.service extension simulation
         `when`(mockProject.getService(BuildViewManager::class.java)).thenReturn(mockBuildViewManager)
@@ -112,9 +105,6 @@ class AppProjectActivityTest {
     @AfterEach
     fun tearDown() {
         applicationManagerMock.close()
-        praiseSyncServiceMock.close()
-        updateNotificationServiceMock.close()
-        disposerMock.close()
         closeable.close()
     }
 
@@ -132,7 +122,7 @@ class AppProjectActivityTest {
             activity.execute(mockProject)
 
             // Then - verify build listener was added
-            verify(mockBuildViewManager).addListener(any(BuildProgressService::class.java), any())
+            verify(mockBuildViewManager).addListener(any<BuildProgressService>(), any())
         }
 
         @Test
@@ -158,7 +148,7 @@ class AppProjectActivityTest {
             activity.execute(mockProject)
 
             // Then
-            verify(mockProject.messageBus).connect(any(com.intellij.openapi.Disposable::class.java))
+            verify(mockProject.messageBus).connect(any<com.intellij.openapi.Disposable>())
             verify(mockMessageBusConnection).subscribe(any(), any())
         }
     }
@@ -177,7 +167,7 @@ class AppProjectActivityTest {
             activity.execute(mockProject)
 
             // Then
-            verify(mockBuildViewManager).addListener(any(BuildProgressService::class.java), any())
+            verify(mockBuildViewManager).addListener(any<BuildProgressService>(), any())
         }
 
         @Test
@@ -274,8 +264,9 @@ class AppProjectActivityTest {
             // When/Then - should not throw exception
             try {
                 activity.execute(mockProject)
-            } catch (e: NullPointerException) {
-                // Expected when service is null in real scenario
+            } catch (e: RuntimeException) {
+                // Expected: project.service<T>() throws (NPE on older platforms, a
+                // service-not-found RuntimeException on newer ones) when the service is absent.
             }
         }
 

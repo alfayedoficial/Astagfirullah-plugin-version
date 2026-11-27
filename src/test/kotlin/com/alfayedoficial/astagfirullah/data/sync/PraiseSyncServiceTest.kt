@@ -1,5 +1,6 @@
 package com.alfayedoficial.astagfirullah.data.sync
 
+import com.alfayedoficial.astagfirullah.TestApplication
 import com.alfayedoficial.astagfirullah.core.Constants
 import com.alfayedoficial.astagfirullah.data.api.ApiResult
 import com.alfayedoficial.astagfirullah.data.api.PraiseApiService
@@ -17,6 +18,7 @@ import org.mockito.MockedStatic
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import java.util.concurrent.CountDownLatch
@@ -38,8 +40,7 @@ class PraiseSyncServiceTest {
     @Mock
     private lateinit var mockUpdateCacheService: PluginUpdateCacheService
 
-    private lateinit var mockedPraiseCacheStatic: MockedStatic<PraiseCacheService>
-    private lateinit var mockedUpdateCacheStatic: MockedStatic<PluginUpdateCacheService>
+    private lateinit var testApplication: TestApplication
     private lateinit var mockedSettingsApiStatic: MockedStatic<SettingsApiService>
     private lateinit var mockedPraiseApiStatic: MockedStatic<PraiseApiService>
 
@@ -52,24 +53,23 @@ class PraiseSyncServiceTest {
         closeable = MockitoAnnotations.openMocks(this)
 
         // Mock static getInstance() methods
-        mockedPraiseCacheStatic = mockStatic(PraiseCacheService::class.java)
-        mockedUpdateCacheStatic = mockStatic(PluginUpdateCacheService::class.java)
+        testApplication = TestApplication()
         mockedSettingsApiStatic = mockStatic(SettingsApiService::class.java)
         mockedPraiseApiStatic = mockStatic(PraiseApiService::class.java)
 
-        mockedPraiseCacheStatic.`when`<PraiseCacheService> { PraiseCacheService.getInstance() }
-            .thenReturn(mockPraiseCacheService)
-        mockedUpdateCacheStatic.`when`<PluginUpdateCacheService> { PluginUpdateCacheService.getInstance() }
-            .thenReturn(mockUpdateCacheService)
+        testApplication.register(PraiseCacheService::class.java, mockPraiseCacheService)
+        testApplication.register(PluginUpdateCacheService::class.java, mockUpdateCacheService)
 
         // Create a fresh instance for each test
         syncService = PraiseSyncService()
+        // Keep the sync on the test thread: Mockito static mocks are thread-local.
+        syncService.ioDispatcher = kotlinx.coroutines.Dispatchers.Unconfined
     }
 
     @AfterEach
     fun tearDown() {
-        mockedPraiseCacheStatic.close()
-        mockedUpdateCacheStatic.close()
+        syncService.dispose()
+        testApplication.close()
         mockedSettingsApiStatic.close()
         mockedPraiseApiStatic.close()
         closeable.close()
@@ -247,11 +247,16 @@ class PraiseSyncServiceTest {
             whenever(mockUpdateCacheService.needsUpdateCheck()).thenReturn(false)
             whenever(mockPraiseCacheService.getCurrentVersion()).thenReturn(1)
 
+            // A second sync attempted WHILE the first is mid-flight (inside its settings
+            // fetch) must be turned away. Done re-entrantly on the test thread rather than
+            // from two threads: Mockito static mocks are thread-local, so on a second thread
+            // the mocked Application/API objects vanished and the test could never pass.
             val settingsData = createSettingsData(praiseVersion = 2, versionName = "2.0.0")
+            var secondResult: PraiseSyncService.SyncResult? = null
             mockedSettingsApiStatic.`when`<SettingsResult> { SettingsApiService.fetchSettings() }
                 .thenAnswer {
-                    // Simulate slow network call
-                    Thread.sleep(100)
+                    assertTrue(syncService.isSyncInProgress())
+                    secondResult = kotlinx.coroutines.runBlocking { syncService.syncIfNeeded() }
                     SettingsResult.Success(settingsData)
                 }
 
@@ -263,37 +268,13 @@ class PraiseSyncServiceTest {
 
             setupUpdateCheckMocks(settingsData, isUpdateAvailable = false)
 
-            val syncCount = AtomicInteger(0)
-            val latch = CountDownLatch(2)
+            // When
+            val firstResult = syncService.syncIfNeeded()
 
-            // When: Two concurrent sync attempts
-            thread {
-                kotlinx.coroutines.runBlocking {
-                    val result = syncService.syncIfNeeded()
-                    if (result is PraiseSyncService.SyncResult.Success) {
-                        syncCount.incrementAndGet()
-                    }
-                    latch.countDown()
-                }
-            }
-
-            Thread.sleep(10) // Ensure first thread starts first
-
-            thread {
-                kotlinx.coroutines.runBlocking {
-                    val result = syncService.syncIfNeeded()
-                    // Second call should get AlreadyUpToDate because sync is in progress
-                    if (result is PraiseSyncService.SyncResult.AlreadyUpToDate) {
-                        syncCount.incrementAndGet()
-                    }
-                    latch.countDown()
-                }
-            }
-
-            latch.await(5, TimeUnit.SECONDS)
-
-            // Then: Both should complete but only one should trigger actual sync
-            assertEquals(2, syncCount.get())
+            // Then: the first sync did the work, the overlapping one was turned away
+            assertTrue(firstResult is PraiseSyncService.SyncResult.Success, "first: $firstResult")
+            assertTrue(secondResult is PraiseSyncService.SyncResult.AlreadyUpToDate, "second: $secondResult")
+            mockedSettingsApiStatic.verify({ SettingsApiService.fetchSettings() }, times(1))
         }
 
         @Test
@@ -685,7 +666,8 @@ class PraiseSyncServiceTest {
             // Then: Should return error but update cache should still be updated
             assertTrue(result is PraiseSyncService.SyncResult.Error)
             assertEquals("Praise API timeout", (result as PraiseSyncService.SyncResult.Error).message)
-            verify(mockUpdateCacheService).updateCache(any(), any(), any(), any(), any())
+            // anyOrNull(): updateUrl is nullable, and any() type-checks each argument.
+            verify(mockUpdateCacheService).updateCache(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
         }
 
         @Test

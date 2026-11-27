@@ -24,6 +24,7 @@ object PraiseApiService {
      * @param currentVersion The current local version (0 for first sync)
      * @return ApiResult containing either the parsed response or an error
      */
+    @JvmStatic
     fun fetchPraises(currentVersion: Int): ApiResult {
         val urlString = "${Constants.API_BASE_URL}${Constants.API_PRAISE_LIST_ENDPOINT}?version=$currentVersion&is_quran=false"
 
@@ -59,6 +60,7 @@ object PraiseApiService {
      * @param categoryId The category to filter by (default: GENERAL = 1)
      * @return List of cached praises ready for storage
      */
+    @JvmStatic
     fun parsePraises(response: ApiResponse, categoryId: Int = CategoryIds.GENERAL): List<CachedPraise> {
         val data = response.data ?: return emptyList()
 

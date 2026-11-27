@@ -171,13 +171,18 @@ class AstagfirullahSettings : PersistentStateComponent<AstagfirullahSettings.Sta
     /**
      * Whether the "What's New" dialog should be shown for [currentVersion].
      *
-     * True when the running version differs from the last version whose What's New the user
-     * saw. A fresh install is handled by the caller: [FirstRunSetupActivity] records the
+     * True when the running version's feature line (major.minor) differs from the last
+     * version whose What's New the user saw. Patch releases (3.0.0 -> 3.0.1) are hotfixes
+     * with no new highlights, so they do not re-show the same dialog. A fresh install is handled by the caller: [FirstRunSetupActivity] records the
      * current version after the setup wizard so a new user never sees both the wizard and a
      * What's New for the same version.
      */
     fun shouldShowWhatsNew(currentVersion: String): Boolean =
-        lastWhatsNewVersion != currentVersion
+        featureLine(lastWhatsNewVersion) != featureLine(currentVersion)
+
+    /** "3.0.1" -> "3.0"; anything without a minor part is compared as-is. */
+    private fun featureLine(version: String): String =
+        version.split('.').take(2).joinToString(".")
 
     /**
      * Checks if this is the first run of the plugin.

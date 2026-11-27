@@ -1,6 +1,7 @@
 package com.alfayedoficial.astagfirullah
 
 import com.alfayedoficial.astagfirullah.core.Constants
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
@@ -25,11 +26,26 @@ class AstagfirullahConfigurableTest {
     private lateinit var mockSettings: AstagfirullahSettings
     private lateinit var mockStatistics: StatisticsService
 
+    private lateinit var testApplication: TestApplication
+
     @BeforeEach
     fun setUp() {
-        configurable = AstagfirullahConfigurable()
         mockSettings = mock()
         mockStatistics = mock()
+        // The constructor resolves four application services; without an Application they
+        // NPE'd in AstagfirullahSettings.getInstance() and failed every test in this class.
+        testApplication = TestApplication().apply {
+            register(AstagfirullahSettings::class.java, mockSettings)
+            register(StatisticsService::class.java, mockStatistics)
+            register(com.alfayedoficial.astagfirullah.data.cache.PraiseCacheService::class.java, mock())
+            register(com.alfayedoficial.astagfirullah.data.cache.PluginUpdateCacheService::class.java, mock())
+        }
+        configurable = AstagfirullahConfigurable()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        testApplication.close()
     }
 
     @Nested
@@ -555,7 +571,9 @@ class AstagfirullahConfigurableTest {
             // Based on source: JBLabel(Constants.PLUGIN_VERSION)
             val version = Constants.PLUGIN_VERSION
 
-            assertEquals("2.0.0", version, "Should display current version")
+            // Was hardcoded "2.0.0" and went stale. The value is stamped from project.version
+            // at build time, so assert it is a real semantic version rather than a literal.
+            assertTrue(Regex("""\d+\.\d+\.\d+""").matches(version), "Should display current version, got '$version'")
         }
 
         @Test

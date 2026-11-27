@@ -1,22 +1,24 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 
 plugins {
    id("java")
    // 2.4.0 is required: IntelliJ 2026.2 ships Kotlin metadata 2.4.0, which an older
    // compiler refuses to read ("binary version of its metadata is 2.4.0").
-   id("org.jetbrains.kotlin.jvm") version "2.4.0"
+   id("org.jetbrains.kotlin.jvm") version "2.4.21"
    // IntelliJ Platform Gradle Plugin 2.x, replacing the deprecated org.jetbrains.intellij
    // 1.x. 1.x is no longer developed, cannot build against 2024.2+, and resolved verifier
    // IDEs through a feed that stops at 2025.3 -- so it could not verify the 2026.x
-   // releases this plugin declares support for. 2.18.1 requires Gradle 9.
-   id("org.jetbrains.intellij.platform") version "2.18.1"
+   // releases this plugin declares support for. 2.x requires Gradle 9.
+   // 2.20.1: first line that resolves the unified IntelliJ IDEA 2026.3 distribution.
+   id("org.jetbrains.intellij.platform") version "2.20.1"
 }
 
 
 group = "com.alfayedoficial"
-version = "3.0.0"
+version = "3.0.1"
 
 repositories {
    mavenCentral()
@@ -34,9 +36,21 @@ dependencies {
       // on macOS ARM) and those URLs 404, surfacing as a misleading
       // "Could not find idea:ideaIC:<version>". The multi-OS Maven archive
       // com.jetbrains.intellij.idea:ideaIC does exist for 2025.3, 2026.1 and 2026.2.
-      create("IC", "2026.2") {
+      //
+      // From 2025.3 JetBrains ships ONE IntelliJ IDEA distribution (Community and Ultimate
+      // merged), so 2026.3 is targeted through the unified `intellijIdea` type rather than
+      // "IC". The plugin depends only on com.intellij.modules.platform, so building against
+      // the unified IDE adds no dependency on paid-only APIs.
+      intellijIdea("2026.3") {
          useInstaller = false
       }
+      // 2026.3 split the Build tool window API (com.intellij.build.BuildViewManager,
+      // BuildProgressListener, BuildEvent) out of the core into its own content module,
+      // so it is no longer on the compile classpath by default ("Unresolved reference
+      // 'BuildViewManager'"). BuildProgressService / AppProjectActivity use it to show
+      // dhikr while a build runs. On 2024.2-2026.2 the same classes live in the core, so
+      // this only affects compilation against 2026.3 -- the verifier matrix proves both.
+      bundledModule("intellij.platform.buildView")
       // NOTE: testFramework(TestFrameworkType.Platform) is deliberately NOT declared.
       // These are plain JUnit unit tests, not BasePlatformTestCase tests. Adding the
       // platform test framework registers com.intellij.tests.JUnit5TestSessionListener,
@@ -129,10 +143,11 @@ intellijPlatform {
          // compiles to Java 21 bytecode, which will not load on older IDEs -- so the
          // floor moves up from 232 as part of this migration.
          sinceBuild = "242"
-         // 262 = IntelliJ 2026.2. Branch number = last two digits of the year + release
-         // number. Do NOT omit untilBuild: an absent value opts the plugin into every
-         // future, unreleased build and into IDEs never verified against.
-         untilBuild = "262.*"
+         // 263 = IntelliJ 2026.3 (and Android Studio Stingray, which is built on it).
+         // Branch number = last two digits of the year + release number. Do NOT omit
+         // untilBuild: an absent value opts the plugin into every future, unreleased
+         // build and into IDEs never verified against.
+         untilBuild = "263.*"
       }
    }
 
@@ -177,9 +192,30 @@ intellijPlatform {
             "2025.2",
             "2025.3",
             "2026.1",
-            "2026.2", // untilBuild ceiling (262)
+            "2026.2",
+            "2026.3", // untilBuild ceiling (263)
+            // Android Studio is where most user reports come from, and it lags IntelliJ
+            // and patches the platform, so verify it directly: "AI-<Android Studio version>".
+            "AI-2026.2.2.11", // Android Studio Rabbit 2 Patch 3 (current stable)
          )
-         versions.forEach { create("IC", it) }
+         versions.forEach { version ->
+            if (version.startsWith("AI-")) {
+               // Android Studio is published only as installers (no Maven coordinates), so
+               // it must resolve through the installer even though the build target above
+               // uses useInstaller = false.
+               create(IntelliJPlatformType.AndroidStudio, version.removePrefix("AI-")) {
+                  useInstaller = true
+               }
+               return@forEach
+            }
+            // 2026.3+ is published only as the unified IntelliJ IDEA distribution; the
+            // older releases stay on IC, exactly as they were verified for 3.0.0.
+            val (year, release) = version.split('.').map(String::toInt)
+            val unified = year > 2026 || (year == 2026 && release >= 3)
+            val type = if (unified) IntelliJPlatformType.IntellijIdea
+               else IntelliJPlatformType.IntellijIdeaCommunity
+            create(type, version)
+         }
       }
    }
 
@@ -200,14 +236,14 @@ intellijPlatform {
 // consequences of supporting a RANGE rather than a single platform, and neither should be
 // "fixed" as suggested:
 //
-//  1. "since-build 242 is lower than target platform 262" -- yes. We build against the
+//  1. "since-build 242 is lower than target platform 263" -- yes. We build against the
 //     newest supported platform but support back to 2024.2. Following the advice and
-//     raising since-build to 262 would drop every user below 2026.2. The real risk it
+//     raising since-build to 263 would drop every user below 2026.3. The real risk it
 //     hints at (accidentally calling an API that only exists in 2026.x) is caught by the
 //     Plugin Verifier running against the 242 floor, which is why that matrix job exists.
 //
-//  2. "sourceCompatibility 21 but 2026.2 requires Java 25" -- Java 21 is correct. It is
-//     the lowest common denominator across 242..262, and Java 21 bytecode runs fine on a
+//  2. "sourceCompatibility 21 but 2026.2+ requires Java 25" -- Java 21 is correct. It is
+//     the lowest common denominator across 242..263, and Java 21 bytecode runs fine on a
 //     Java 25 runtime. Compiling to 25 would make the plugin unloadable on 2024.2.
 tasks {
    // 2024.2+ requires Java 21.

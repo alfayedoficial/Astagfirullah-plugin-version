@@ -23,6 +23,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import javax.swing.*
+import kotlinx.coroutines.launch
 
 /**
  * Configurable for Astagfirullah plugin settings.
@@ -766,16 +767,17 @@ class AstagfirullahConfigurable : Configurable {
         syncStatusLabel?.text = "Syncing..."
         syncStatusLabel?.foreground = JBColor(Color(33, 150, 243), Color(33, 150, 243))
 
-        Thread {
+        // A coroutine launch, not Thread { runBlocking { } }: compiled against 2026.3,
+        // runBlocking binds to the IDE's forked BuildersKt.runBlockingK, which does not exist
+        // on 2024.2-2026.2 and would throw NoSuchMethodError there (Plugin Verifier finding).
+        // Runs in the sync service's own scope, cancelled if the plugin is unloaded.
+        val syncService = PraiseSyncService.getInstance()
+        syncService.coroutineScope.launch {
             var resultText = ""
             var isSuccess = false
 
             try {
-                val syncService = PraiseSyncService.getInstance()
-                // Run the suspend function in a blocking way
-                val result = kotlinx.coroutines.runBlocking {
-                    syncService.forceSync()
-                }
+                val result = syncService.forceSync()
 
                 when (result) {
                     is PraiseSyncService.SyncResult.Success -> {
@@ -810,7 +812,7 @@ class AstagfirullahConfigurable : Configurable {
                 syncButton?.isEnabled = true
                 refreshSyncUI()
             }
-        }.start()
+        }
     }
 
     /**

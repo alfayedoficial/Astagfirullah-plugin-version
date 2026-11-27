@@ -47,14 +47,20 @@ data class RegisterRequest(
     val password: String,
     @SerializedName("password_confirmation") val passwordConfirmation: String,
     @SerializedName("role") val role: String = "user",
-    @SerializedName("app_type") val appType: String = API_APP_TYPE
+    @SerializedName("app_type") val appType: String = API_APP_TYPE,
+    // The backend's RegisterRequest validates and stores `platform`; it ignores `app_type`,
+    // so every plugin sign-up was being recorded as platform=ANDROID.
+    @SerializedName("platform") val platform: String = API_APP_TYPE
 )
 
 data class SocialRegisterRequest(
     val name: String,
     @SerializedName("social_id") val socialId: String,
     @SerializedName("role") val role: String = "user",
-    @SerializedName("app_type") val appType: String = API_APP_TYPE
+    @SerializedName("app_type") val appType: String = API_APP_TYPE,
+    // The backend's RegisterRequest validates and stores `platform`; it ignores `app_type`,
+    // so every plugin sign-up was being recorded as platform=ANDROID.
+    @SerializedName("platform") val platform: String = API_APP_TYPE
 )
 // ==================== API Response Models ====================
 
@@ -107,7 +113,8 @@ data class AuthMeResponse(
 data class AuthErrorResponse(
     @SerializedName("status") val status: Boolean,
     @SerializedName("message") val message: String,
-    @SerializedName("errors") val errors: Map<String, List<String>>? = null
+    // Backend FormRequests return field errors under "error" (singular); accept both.
+    @SerializedName(value = "errors", alternate = ["error"]) val errors: Map<String, List<String>>? = null
 )
 
 // ==================== Result Sealed Classes ====================

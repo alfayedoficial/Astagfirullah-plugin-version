@@ -95,19 +95,27 @@ data class SettingsApiResponse(
  */
 data class SettingsData(
     @SerializedName("id") val id: Int,
-    @SerializedName("app_type") val appType: String,
+    // Production /api/v2/settings does NOT return app_type, update_url or is_active (see
+    // AppConfigurationService::getSettingsV2 in the backend). They were declared non-null,
+    // so Gson silently left null in a Kotlin non-null field. Nullable now, matching the
+    // real contract; kept for forward-compatibility if the backend adds them.
+    @SerializedName("app_type") val appType: String? = null,
     @SerializedName("version_code") val versionCode: Int,
     @SerializedName("version_name") val versionName: String,
     @SerializedName("praise_version") val praiseVersion: Int,
-    @SerializedName("update_type") val updateType: String,  // "NORMAL" or "EMERGENCY"
-    @SerializedName("update_url") val updateUrl: String?,
-    @SerializedName("is_active") val isActive: Boolean
+    @SerializedName("update_type") val updateType: String,  // "NONE", "NORMAL" or "EMERGENCY"
+    @SerializedName("update_url") val updateUrl: String? = null,
+    @SerializedName("is_active") val isActive: Boolean? = null,
+    // Release notes for the latest version, as sent by production.
+    @SerializedName("app_details") val appDetails: String? = null
 )
 
 /**
  * Update type constants
  */
 object UpdateType {
+    /** Server says this release needs no prompt (e.g. a silent/maintenance release). */
+    const val NONE = "NONE"
     const val NORMAL = "NORMAL"
     const val EMERGENCY = "EMERGENCY"
 }
